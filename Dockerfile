@@ -1,0 +1,52 @@
+ARG BUILD_FROM
+FROM $BUILD_FROM
+
+# Install requirements for add-on
+RUN \
+  apk add --no-cache \
+    nodejs \
+    npm
+
+# Copy root filesystem
+COPY rootfs /
+
+# Set work directory
+WORKDIR /usr/src/app
+
+# Copy package.json and install node modules
+COPY package.json .
+RUN npm install
+
+# Copy data for add-on
+COPY . .
+
+# Make scripts executable
+RUN chmod a+x /etc/services.d/carbonoz/run \
+    && chmod a+x /etc/services.d/carbonoz/finish \
+    && chmod a+x /usr/bin/carbonoz.sh
+
+# Build arguments
+ARG BUILD_ARCH
+ARG BUILD_DATE
+ARG BUILD_REF
+ARG BUILD_VERSION
+
+# Labels
+LABEL \
+    io.hass.name="Carbonoz SolarAutopilot" \
+    io.hass.description="CARBONOZ SolarAutopilot for Home Assistant with live Solar dashboard and MQTT inverter control" \
+    io.hass.arch="${BUILD_ARCH}" \
+    io.hass.type="addon" \
+    io.hass.version=${BUILD_VERSION} \
+    maintainer="Elite Desire <eelitedesire@gmail.com>" \
+    org.opencontainers.image.title="Carbonoz SolarAutopilot" \
+    org.opencontainers.image.description="CARBONOZ SolarAutopilot for Home Assistant with live Solar dashboard and MQTT inverter control" \
+    org.opencontainers.image.vendor="Home Assistant Community Add-ons" \
+    org.opencontainers.image.authors="Elite Desire <eelitedesire@gmail.com>" \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.url="https://github.com/eelitedesire/carbonoz_solarautopilot" \
+    org.opencontainers.image.source="https://github.com/eelitedesire/carbonoz_solarautopilot" \
+    org.opencontainers.image.documentation="https://github.com/eelitedesire/carbonoz_solarautopilot/blob/main/README.md" \
+    org.opencontainers.image.created=${BUILD_DATE} \
+    org.opencontainers.image.revision=${BUILD_REF} \
+    org.opencontainers.image.version=${BUILD_VERSION}

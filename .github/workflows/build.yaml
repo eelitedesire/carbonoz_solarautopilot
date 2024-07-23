@@ -1,0 +1,37 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - name: Install dependencies
+        run: npm ci
+      - name: Run linter
+        run: npm run lint
+      - name: Run tests
+        run: npm test
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg BUILD_FROM="ghcr.io/home-assistant/amd64-base:3.14" \
+            --build-arg BUILD_ARCH="amd64" \
+            --build-arg BUILD_DATE="$(date +"%Y-%m-%dT%H:%M:%SZ")" \
+            --build-arg BUILD_DESCRIPTION="CARBONOZ SolarAutopilot for Home Assistant" \
+            --build-arg BUILD_NAME="Carbonoz SolarAutopilot" \
+            --build-arg BUILD_REF="${{ github.sha }}" \
+            --build-arg BUILD_REPOSITORY="https://github.com/${{ github.repository }}" \
+            --build-arg BUILD_VERSION="${{ github.ref }}" \
+            -t carbonoz_solarautopilot .
