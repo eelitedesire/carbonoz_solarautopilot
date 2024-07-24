@@ -1,41 +1,287 @@
 <!DOCTYPE html>
-<html>
-  <head> 
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Solar Autopilot </title>
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="robots" content="all,follow">
-    <!-- Bootstrap CSS-->
-    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
-    <!-- Font Awesome CSS-->
-    <link rel="stylesheet" href="vendor/font-awesome/css/font-awesome.min.css">
-    <!-- Custom Font Icons CSS-->
-    <link rel="stylesheet" href="css/font.css">
-    <!-- Google fonts - Muli-->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Muli:300,400,700">
-    <!-- theme stylesheet-->
-    <link rel="stylesheet" href="css/style.default.css" id="theme-stylesheet">
-    <!-- Custom stylesheet - for your changes-->
-    <link rel="stylesheet" href="css/custom.css">
-    <!-- Favicon-->
-    <link rel="shortcut icon" href="https://carbonoz.com/assets/images/image04.jpg?v=8b5d1d9b">
-    <!-- Tweaks for older IEs--><!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbonoz SolarAutopilot</title>
+<style>
+ 
+ :root {
+    --primary-color: #DEAF0B;
+    --bg-color: #f5f6fa;
+    --text-color: #2f3640;
+    --icon-color: #636e72;
+}
 
-        <style>
+body, html {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: var(--bg-color);
     
-            .container {
-                max-width: 800px;
-                margin: auto;
-                background: white;
-                padding: 20px;
-                border-radius: 5px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.05);
-            }
-            h1, h2 {
+}
+
+.container {
+    display: flex;
+    height: 100%;
+}
+
+.sidebar {
+    width: 280px;
+    background-color: white;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease;
+    z-index: 10;
+}
+
+.sidebar.collapsed {
+    width: 80px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+}
+
+.logo-icon {
+    width: 50px;
+    height: 50px;
+    background-color: var(--primary-color);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.logo-text {
+    margin-left: 10px;
+    font-weight: bold;
+    color: var(--text-color);
+    font-size: 18px;
+}
+
+.logo-text .highlight {
+    color: red;
+}
+
+.search {
+    padding: 10px 20px;
+}
+
+.search input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #dcdde1;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+nav {
+    flex-grow: 1;
+}
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+nav li {
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 18px;
+}
+nav li a{
+    text-decoration: none;
+    color: #2f3640;
+    font-weight: bold;
+}
+nav li:hover {
+    background-color: var(--bg-color);
+}
+
+nav li i {
+    margin-right: 15px;
+    color: var(--icon-color);
+    font-size: 24px;
+}
+
+.bottom-options {
+    padding: 20px;
+    border-top: 1px solid #dcdde1;
+}
+
+.toggle-sidebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.toggle-text {
+    margin-right: 10px;
+}
+
+.toggle-switch {
+    width: 50px;
+    height: 25px;
+    background-color: #dcdde1;
+    border-radius: 12.5px;
+    position: relative;
+    transition: background-color 0.3s;
+}
+
+.toggle-switch::before {
+    content: '';
+    position: absolute;
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    background-color: white;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+}
+
+.toggle-switch.active {
+    background-color: var(--primary-color);
+}
+
+.toggle-switch.active::before {
+    transform: translateX(25px);
+}
+
+.sidebar.collapsed .logo-text,
+.sidebar.collapsed .search,
+.sidebar.collapsed nav li span,
+.sidebar.collapsed .toggle-text {
+    display: none;
+}
+
+.sidebar.collapsed .logo {
+    justify-content: center;
+}
+
+.sidebar.collapsed nav li {
+    justify-content: center;
+}
+
+.sidebar.collapsed nav li i {
+    margin-right: 0;
+}
+
+.main-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+header {
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.content-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    min-height: 100%;
+}
+
+footer {
+    background-color: var(--primary-color);
+    color: white;
+    text-align: center;
+    padding: 10px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+    }
+
+    .sidebar.collapsed {
+        width: 100%;
+    }
+
+    .main-container {
+        width: 100%;
+    }
+}
+
+/* loading css */
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #e0e0e0;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+
+
+ 
+
+  .logo-text {
+    color: #000000; /* Black color for 'Carbonoz' */
+    font-weight: bold;
+}
+
+.logo-text .highlight {
+    color: #DEAF0B; /* Yellow color for 'SolarAutopilot' */
+}
+  
+  
+          h1, h2 {
                 color: #333;
             }
             form {
@@ -91,7 +337,8 @@
                 margin: 15% auto;
                 padding: 20px;
                 border: 1px solid #888;
-                width: 80%;
+                width: 50%;
+                margin-left: 35%;
             }
             .close {
                 color: #aaa;
@@ -114,198 +361,161 @@
                 overflow-y: auto;
             }
 
-    
-        </style>
-        
-  </head>
-  <body>
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-spinner"></div>
-      </div>
-
-      <div id="pageContent">
-    <header class="header">   
-      <nav class="navbar navbar-expand-lg">
-        <div class="search-panel">
-          <div class="search-inner d-flex align-items-center justify-content-center">
-            <div class="close-btn">Close <i class="fa fa-close"></i></div>
-            <form id="searchForm" action="#">
-              <div class="form-group">
-                <input type="search" name="search" placeholder="What are you searching for...">
-                <button type="submit" class="submit">Search</button>
-              </div>
-            </form>
+</style>
+</head>
+<body>
+   
+    <div class="container">
+        <div id="loadingOverlay" class="loading-overlay">
+            <div class="loading-spinner"></div>
           </div>
-        </div>
-        <div class="container-fluid d-flex align-items-center justify-content-between">
-          <div class="navbar-header">
-            <!-- Navbar Header--><a href="<%= ingress_path %>/" class="navbar-brand">
-              <div class="brand-text brand-big visible text-uppercase"><img src="https://carbonoz.com/assets/images/image04.jpg?v=8b5d1d9b" alt="" width="40px"style="margin-right: 10px;"><strong class="text-primary">Solar</strong><strong>Autopilot</strong></div>
-              <div class="brand-text brand-sm"><img src="https://carbonoz.com/assets/images/image04.jpg?v=8b5d1d9b" alt="" width="40px"style="margin-right: 10px;"><strong class="text-primary">S</strong><strong>A</strong></div></a>
-            <!-- Sidebar Toggle Btn-->
-            <button class="sidebar-toggle"><i class="fa fa-long-arrow-left"></i></button>
-          </div>
-         
-        </div>
-      </nav>
-    </header>
-    <div class="d-flex align-items-stretch">
-      <!-- Sidebar Navigation-->
-      <nav id="sidebar">
-        <!-- Sidebar Header-->
-        <div class="sidebar-header d-flex align-items-center">
-
-          
-        </div>
-        <!-- Sidebar Navidation Menus--><span class="heading">Main</span>
-        <ul class="list-unstyled">
-            <li class="active"><a href="<%= ingress_path %>/"><i class="fa fa-home"></i> Home</a></li>
-            <li><a href="<%= ingress_path %>/dashboard"><i class="fa fa-bolt"></i> Energy</a></li>
-            <li><a href="<%= ingress_path %>/analytics"><i class="fa fa-calculator"></i> Totals</a></li>
-            <li><a href="<%= ingress_path %>/chart"><i class="fa fa-bar-chart"></i> Charts</a></li>
-
-            <li><a href="<%= ingress_path %>/messages"><i class="fa fa-envelope"></i> Messages</a></li>
-            <li><a href="<%= ingress_path %>/settings"><i class="fa fa-cog"></i> Settings</a></li>
-        </ul>
-      </nav>
-      <!-- Sidebar Navigation end-->
-      <div class="page-content">
-        <div class="page-header">
-          <div class="container-fluid">
-            <h2 class="h5 no-margin-bottom">Settings</h2>
-          </div>
-        </div>
-    
-        
-       
-    
-       
-        <section>
-            <div class="container">
-                <div id="system-state"></div>
-        
-                <h2>Universal Settings</h2>
-                <form id="universal-settings-form">
-                    <label for="maxBatteryDischargePower">Max Battery Discharge Power:</label>
-                    <input type="number" id="maxBatteryDischargePower" name="maxBatteryDischargePower" required>
-                    
-                    <label for="gridChargeOn">Grid Charge:</label>
-                    <input type="checkbox" id="gridChargeOn" name="gridChargeOn">
-                    
-                    <label for="generatorChargeOn">Generator Charge:</label>
-                    <input type="checkbox" id="generatorChargeOn" name="generatorChargeOn">
-                    
-                    <label for="dischargeVoltage">Discharge Voltage:</label>
-                    <input type="number" id="dischargeVoltage" name="dischargeVoltage" step="0.1" required>
-                    
-                    <button type="submit">Update Universal Settings</button>
-                </form>
-        
-                <h2>Inverter Settings</h2>
-                <button id="add-inverter-btn">Add New Inverter Type</button>
-                <form id="inverter-settings-form">
-                    <label for="inverter-type">Inverter Type:</label>
-                    <select id="inverter-type" name="type"></select>
-                    
-                    <div id="inverter-specific-settings">
-                        <label for="workMode">Work Mode:</label>
-                        <select id="workMode" name="workMode"></select>
-                        
-                        <label for="solarExportWhenBatteryFull">Solar Export When Battery Full:</label>
-                        <input type="checkbox" id="solarExportWhenBatteryFull" name="solarExportWhenBatteryFull">
-                        
-                        <label for="energyPattern">Energy Pattern:</label>
-                        <select id="energyPattern" name="energyPattern"></select>
-                        
-                        <label for="maxSellPower">Max Sell Power:</label>
-                        <input type="number" id="maxSellPower" name="maxSellPower">
-                    </div>
-                    
-                    <button type="submit" class="update">Update Inverter Settings</button>
-                    <button type="button" id="delete-inverter-btn">Delete Inverter Type</button>
-                </form>
-        
-                <h2>Automation Rules</h2>
-                <button id="add-rule-btn">Add New Rule</button>
-                <br>
-                <br>
-                <table id="automation-rules-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Conditions</th>
-                            <th>Actions</th>
-                            <th>Days</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-        
-                <h2>Scheduled Settings</h2>
-                <button id="add-scheduled-setting-btn">Add New Scheduled Setting</button>
-                <br>
-        <br>
-                <table id="scheduled-settings-table">
-                    <thead>
-                        <tr>
-                            <th>Key</th>
-                            <th>Value</th>
-                            <th>Day</th>
-                            <th>Hour</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-        
-                <h2>Automation Log</h2>
-                <div id="automation-log"></div>
+          <div id="pageContent"> </div>
+        <div class="sidebar" id="sidebar">
+            <div class="logo">
+                <div class="logo-icon"><img src="https://carbonoz.com/assets/images/image04.jpg?v=8b5d1d9b" width="45px" alt=""></div>
+                <span class="logo-text">Carbonoz <span class="highlight">SolarAutopilot</span></span>
             </div>
-        
-            <div id="rule-modal" class="modal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h2>Edit Rule</h2>
-                    <form id="rule-form">
-                        <label for="rule-name">Name:</label>
-                        <input type="text" id="rule-name" required>
-        
-                        <label for="rule-conditions">Conditions (JSON):</label>
-                        <textarea id="rule-conditions" required></textarea>
-        
-                        <label for="rule-actions">Actions (JSON):</label>
-                        <textarea id="rule-actions" required></textarea>
-        
-                        <label for="rule-days">Days (comma-separated):</label>
-                        <input type="text" id="rule-days" required>
-        
-                        <button type="submit">Save Rule</button>
-                    </form>
+            <div class="search">
+                <input type="text" placeholder="Search...">
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="<%= ingress_path %>/"><i>🏠</i><span>Dashboard</span></a></li>
+                    <li><a href="<%= ingress_path %>/dashboard"><i>⚡</i><span>Energy</span></a></li>
+                    <li><a href="<%= ingress_path %>/chart"><i>📊</i><span>Charts</span></a></li>
+                    <li><a href="<%= ingress_path %>/messages"><i>💬</i><span>Messages</span></a></li>
+                    <li><a href="<%= ingress_path %>/settings"><i>⚙️</i><span>Settings</span></a></li>
+                    <li><a href="<%= ingress_path %>/analytics"><i>📈</i><span>Analytics</span></a></li>
+                </ul>
+                
+            </nav>
+            <div class="bottom-options">
+                <div class="toggle-sidebar" id="toggleSidebar">
+                    <span class="toggle-text">Collapse sidebar</span>
+                    <div class="toggle-switch" id="toggleSwitch"></div>
                 </div>
             </div>
-        </section>
-        <footer class="footer">
-          <div class="footer__block block no-margin-bottom">
-            <div class="container-fluid text-center">
-              <!-- Please do not remove the backlink to us unless you support us at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
-               <p class="no-margin-bottom">2024 &copy; Carbonoz</p>
+        </div>
+       
+
+        <div class="main-container">
+            <header>
+                <h1>Dashboard</h1>
+            </header>
+
+            <div class="main-content">
+                <div class="content-card">
+                
+                        <div id="system-state"></div>
+                
+                        <h2>Universal Settings</h2>
+                        <form id="universal-settings-form">
+                            <label for="maxBatteryDischargePower">Max Battery Discharge Power:</label>
+                            <input type="number" id="maxBatteryDischargePower" name="maxBatteryDischargePower" required>
+                            
+                            <label for="gridChargeOn">Grid Charge:</label>
+                            <input type="checkbox" id="gridChargeOn" name="gridChargeOn">
+                            
+                            <label for="generatorChargeOn">Generator Charge:</label>
+                            <input type="checkbox" id="generatorChargeOn" name="generatorChargeOn">
+                            
+                            <label for="dischargeVoltage">Discharge Voltage:</label>
+                            <input type="number" id="dischargeVoltage" name="dischargeVoltage" step="0.1" required>
+                            
+                            <button type="submit">Update Universal Settings</button>
+                        </form>
+                
+                        <h2>Inverter Settings</h2>
+                        <button id="add-inverter-btn">Add New Inverter Type</button>
+                        <form id="inverter-settings-form">
+                            <label for="inverter-type">Inverter Type:</label>
+                            <select id="inverter-type" name="type"></select>
+                            
+                            <div id="inverter-specific-settings">
+                                <label for="workMode">Work Mode:</label>
+                                <select id="workMode" name="workMode"></select>
+                                
+                                <label for="solarExportWhenBatteryFull">Solar Export When Battery Full:</label>
+                                <input type="checkbox" id="solarExportWhenBatteryFull" name="solarExportWhenBatteryFull">
+                                
+                                <label for="energyPattern">Energy Pattern:</label>
+                                <select id="energyPattern" name="energyPattern"></select>
+                                
+                                <label for="maxSellPower">Max Sell Power:</label>
+                                <input type="number" id="maxSellPower" name="maxSellPower">
+                            </div>
+                            
+                            <button type="submit" class="update">Update Inverter Settings</button>
+                            <button type="button" id="delete-inverter-btn">Delete Inverter Type</button>
+                        </form>
+                
+                        <h2>Automation Rules</h2>
+                        <button id="add-rule-btn">Add New Rule</button>
+                        <br>
+                        <br>
+                        <table id="automation-rules-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Conditions</th>
+                                    <th>Actions</th>
+                                    <th>Days</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                
+                        <h2>Scheduled Settings</h2>
+                        <button id="add-scheduled-setting-btn">Add New Scheduled Setting</button>
+                        <br>
+                <br>
+                        <table id="scheduled-settings-table">
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th>Value</th>
+                                    <th>Day</th>
+                                    <th>Hour</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                
+                        <h2>Automation Log</h2>
+                        <div id="automation-log"></div>
+                
+                    <div id="rule-modal" class="modal">
+                        <div class="modal-content">
+                            <span class="close">&times;</span>
+                            <h2>Edit Rule</h2>
+                            <form id="rule-form">
+                                <label for="rule-name">Name:</label>
+                                <input type="text" id="rule-name" required>
+                
+                                <label for="rule-conditions">Conditions (JSON):</label>
+                                <textarea id="rule-conditions" required></textarea>
+                
+                                <label for="rule-actions">Actions (JSON):</label>
+                                <textarea id="rule-actions" required></textarea>
+                
+                                <label for="rule-days">Days (comma-separated):</label>
+                                <input type="text" id="rule-days" required>
+                
+                                <button type="submit">Save Rule</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </footer>
-      </div>
+
+            <footer>
+                <p>&copy; 2024 Carbonoz SolarAutopilot. All rights reserved.</p>
+            </footer>
+        </div>
     </div>
-</div>
-    <!-- JavaScript files-->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/popper.js/umd/popper.min.js"> </script>
-    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
-    <script src="vendor/jquery.cookie/jquery.cookie.js"> </script>
-    <script src="vendor/chart.js/Chart.min.js"></script>
-    <script src="vendor/jquery-validation/jquery.validate.min.js"></script>
-    <script src="js/charts-home.js"></script>
-    <script src="js/front.js"></script>
-   
+     
     <script>
         // Utility functions
         async function fetchAPI(url, method = 'GET', body = null) {
@@ -637,19 +847,33 @@
             };
         });
     </script>
-    <script>
- document.addEventListener('DOMContentLoaded', function() {
-  const loadingOverlay = document.getElementById('loadingOverlay');
-  const pageContent = document.getElementById('pageContent');
+   <script>
+    // toggle sidebar
 
-  // Simulate loading time (you can adjust this as needed)
-  setTimeout(() => {
-    loadingOverlay.style.display = 'none';
-    pageContent.style.display = 'block';
-    // Trigger a custom event to signal that the page is ready
-    document.dispatchEvent(new Event('pageReady'));
-  }, 1500); // 1.5 seconds loading time
+const sidebar = document.getElementById('sidebar');
+const toggleSidebar = document.getElementById('toggleSidebar');
+const toggleSwitch = document.getElementById('toggleSwitch');
+
+toggleSidebar.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    toggleSwitch.classList.toggle('active');
 });
-      </script>
-  </body>
+
+
+// loading js
+
+document.addEventListener('DOMContentLoaded', function() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const pageContent = document.getElementById('pageContent');
+  
+    // Simulate loading time (you can adjust this as needed)
+    setTimeout(() => {
+      loadingOverlay.style.display = 'none';
+      pageContent.style.display = 'block';
+      // Trigger a custom event to signal that the page is ready
+      document.dispatchEvent(new Event('pageReady'));
+    }, 1500); // 1.5 seconds loading time
+  });
+   </script>
+</body>
 </html>

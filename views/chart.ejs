@@ -1,164 +1,64 @@
-
 <!DOCTYPE html>
-<html>
-  <head> 
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Solar Autopilot </title>
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="robots" content="all,follow">
-    <!-- Bootstrap CSS-->
-    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
-    <!-- Font Awesome CSS-->
-    <link rel="stylesheet" href="vendor/font-awesome/css/font-awesome.min.css">
-    <!-- Custom Font Icons CSS-->
-    <link rel="stylesheet" href="css/font.css">
-    <!-- Google fonts - Muli-->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Muli:300,400,700">
-    <!-- theme stylesheet-->
-    <link rel="stylesheet" href="css/style.default.css" id="theme-stylesheet">
-    <!-- Custom stylesheet - for your changes-->
-    <link rel="stylesheet" href="css/custom.css">
-    <!-- Favicon-->
-    <link rel="shortcut icon" href="https://carbonoz.com/assets/images/image04.jpg?v=8b5d1d9b">
-    <!-- Tweaks for older IEs--><!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbonoz SolarAutopilot Dashboard</title>
+   <link rel="stylesheet" href="public/css/style.css">
+</head>
+<body>
    
- <style>
-     .container { 
-          width: 100%; 
-          height: 100vh; 
-          display: flex; 
-          flex-direction: column; 
-          background-color: #fff;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.05);
-  padding: 30px;
-  transition: all 0.3s ease;
-  margin: 20px;
-      }
-     
-      .dashboard { 
-          flex-grow: 1; 
-          border: none; 
-      }
- </style>
-
-  </head>
-  <body>
-    <div id="loadingOverlay" class="loading-overlay">
-      <div class="loading-spinner"></div>
-    </div>
-    <div id="pageContent">
-    <header class="header">   
-      <nav class="navbar navbar-expand-lg">
-        <div class="search-panel">
-          <div class="search-inner d-flex align-items-center justify-content-center">
-            <div class="close-btn">Close <i class="fa fa-close"></i></div>
-            <form id="searchForm" action="#">
-              <div class="form-group">
-                <input type="search" name="search" placeholder="What are you searching for...">
-                <button type="submit" class="submit">Search</button>
-              </div>
-            </form>
+    <div class="container">
+        <div id="loadingOverlay" class="loading-overlay">
+            <div class="loading-spinner"></div>
           </div>
-        </div>
-        <div class="container-fluid d-flex align-items-center justify-content-between">
-          <div class="navbar-header">
-            <!-- Navbar Header--><a href="<%= ingress_path %>/" class="navbar-brand">
-              <div class="brand-text brand-big visible text-uppercase"><img src="https://carbonoz.com/assets/images/image04.jpg?v=8b5d1d9b" alt="" width="40px"style="margin-right: 10px;"><strong class="text-primary">Solar</strong><strong>Autopilot</strong></div>
-              <div class="brand-text brand-sm"><img src="https://carbonoz.com/assets/images/image04.jpg?v=8b5d1d9b" alt="" width="40px"style="margin-right: 10px;"><strong class="text-primary">S</strong><strong>A</strong></div></a>
-            <!-- Sidebar Toggle Btn-->
-            <button class="sidebar-toggle"><i class="fa fa-long-arrow-left"></i></button>
+          <div id="pageContent"> </div>
+        <div class="sidebar" id="sidebar">
+          <div class="logo">
+            <div class="logo-icon"><img src="https://carbonoz.com/assets/images/image04.jpg?v=8b5d1d9b" width="45px" alt=""></div>
+              <span class="logo-text">Carbonoz <span class="highlight">SolarAutopilot</span></span>
           </div>
-         
-        </div>
-      </nav>
-    </header>
-    <div class="d-flex align-items-stretch">
-      <!-- Sidebar Navigation-->
-      <nav id="sidebar">
-        <!-- Sidebar Header-->
-        <div class="sidebar-header d-flex align-items-center">
-
-          
-        </div>
-        <!-- Sidebar Navidation Menus--><span class="heading">Main</span>
-        <ul class="list-unstyled">
-          <li class="active"><a href="<%= ingress_path %>/"><i class="fa fa-home"></i> Home</a></li>
-          <li><a href="<%= ingress_path %>/dashboard"><i class="fa fa-bolt"></i> Energy</a></li>
-          <li><a href="<%= ingress_path %>/analytics"><i class="fa fa-calculator"></i> Totals</a></li>
-          <li><a href="<%= ingress_path %>/chart"><i class="fa fa-bar-chart"></i> Charts</a></li>
-
-          <li><a href="<%= ingress_path %>/messages"><i class="fa fa-envelope"></i> Messages</a></li>
-          <li><a href="<%= ingress_path %>/settings"><i class="fa fa-cog"></i> Settings</a></li>
-      </ul>
-      </nav>
-      <!-- Sidebar Navigation end-->
-      <div class="page-content">
-        <div class="page-header">
-          <div class="container-fluid">
-            <h2 class="h5 no-margin-bottom">Charts</h2>
-          </div>
-        </div>
-    
-        
-       
-    
-       
-        <section>
-          <div class="container">
-            <iframe src="<%= grafanaUrl %>/grafana/d/solar_power_dashboard/solar-power-dashboard?orgId=1&kiosk=tv" 
-                class="dashboard" 
-                width="100%" 
-                height="100%" 
-                frameborder="0">
-        </iframe>
-        </div>
-        </section>
-        <footer class="footer">
-          <div class="footer__block block no-margin-bottom">
-            <div class="container-fluid text-center">
-              <!-- Please do not remove the backlink to us unless you support us at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
-               <p class="no-margin-bottom">2024 &copy; Carbonoz</p>
+            <div class="search">
+                <input type="text" placeholder="Search...">
             </div>
-          </div>
-        </footer>
-      </div>
-    </div>
-  </div>
-    <!-- JavaScript files-->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/popper.js/umd/popper.min.js"> </script>
-    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
-    <script src="vendor/jquery.cookie/jquery.cookie.js"> </script>
-    <script src="vendor/chart.js/Chart.min.js"></script>
-    <script src="vendor/jquery-validation/jquery.validate.min.js"></script>
-    <script src="js/charts-home.js"></script>
-    <script src="js/front.js"></script>
-  
-    <script>
-        // Refresh the page every 5 minutes to keep data updated
-        setTimeout(function() {
-            location.reload();
-        }, 5 * 60 * 1000);
-    </script>
-    <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const loadingOverlay = document.getElementById('loadingOverlay');
-  const pageContent = document.getElementById('pageContent');
+            <nav>
+              <ul>
+                <li><a href="<%= ingress_path %>/"><i>🏠</i><span>Dashboard</span></a></li>
+                <li><a href="<%= ingress_path %>/dashboard"><i>⚡</i><span>Energy</span></a></li>
+                <li><a href="<%= ingress_path %>/chart"><i>📊</i><span>Charts</span></a></li>
+                <li><a href="<%= ingress_path %>/messages"><i>💬</i><span>Messages</span></a></li>
+                <li><a href="<%= ingress_path %>/settings"><i>⚙️</i><span>Settings</span></a></li>
+                <li><a href="<%= ingress_path %>/analytics"><i>📈</i><span>Analytics</span></a></li>
+            </ul>
+            </nav>
+            <div class="bottom-options">
+                <div class="toggle-sidebar" id="toggleSidebar">
+                    <span class="toggle-text">Collapse sidebar</span>
+                    <div class="toggle-switch" id="toggleSwitch"></div>
+                </div>
+            </div>
+        </div>
+       
 
-  // Simulate loading time (you can adjust this as needed)
-  setTimeout(() => {
-    loadingOverlay.style.display = 'none';
-    pageContent.style.display = 'block';
-    // Trigger a custom event to signal that the page is ready
-    document.dispatchEvent(new Event('pageReady'));
-  }, 1500); // 1.5 seconds loading time
-});
-    </script>
-  </body>
+        <div class="main-container">
+            <header>
+                <h1>Dashboard</h1>
+            </header>
+
+            <div class="main-content">
+                <div class="content-card">
+                    <h2>Charts</h2>
+                  
+                </div>
+            </div>
+
+            <footer>
+                <p>&copy; 2024 Carbonoz SolarAutopilot. All rights reserved.</p>
+            </footer>
+        </div>
+    </div>
+     
+<script src="/public/js/main.js"></script>
+   
+</body>
 </html>
