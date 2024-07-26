@@ -17,6 +17,8 @@ panel_icon: mdi:solar-power
 panel_title: Carbonoz SolarAutopilot
 hassio_api: true
 homeassistant_api: true
+ports:
+  3000/tcp: 3000
 options:
   mqtt_host: "core-mosquitto"
   mqtt_port: 1883

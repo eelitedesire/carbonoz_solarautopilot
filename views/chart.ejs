@@ -4,7 +4,283 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carbonoz SolarAutopilot Dashboard</title>
-   <link rel="stylesheet" href="public/css/style.css">
+  <style>
+     :root {
+    --primary-color: #DEAF0B;
+    --bg-color: #f5f6fa;
+    --text-color: #2f3640;
+    --icon-color: #636e72;
+}
+
+body, html {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: var(--bg-color);
+    
+}
+
+.container {
+    display: flex;
+    height: 100%;
+}
+
+.sidebar {
+    width: 280px;
+    background-color: white;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease;
+    z-index: 10;
+}
+
+.sidebar.collapsed {
+    width: 80px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+}
+
+.logo-icon {
+    width: 50px;
+    height: 50px;
+    background-color: var(--primary-color);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.logo-text {
+    margin-left: 10px;
+    font-weight: bold;
+    color: var(--text-color);
+    font-size: 18px;
+}
+
+.logo-text .highlight {
+    color: red;
+}
+
+.search {
+    padding: 10px 20px;
+}
+
+.search input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #dcdde1;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+nav {
+    flex-grow: 1;
+}
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+nav li {
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 18px;
+}
+nav li a{
+    text-decoration: none;
+    color: #2f3640;
+    font-weight: bold;
+}
+nav li:hover {
+    background-color: var(--bg-color);
+}
+
+nav li i {
+    margin-right: 15px;
+    color: var(--icon-color);
+    font-size: 24px;
+}
+
+.bottom-options {
+    padding: 20px;
+    border-top: 1px solid #dcdde1;
+}
+
+.toggle-sidebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.toggle-text {
+    margin-right: 10px;
+}
+
+.toggle-switch {
+    width: 50px;
+    height: 25px;
+    background-color: #dcdde1;
+    border-radius: 12.5px;
+    position: relative;
+    transition: background-color 0.3s;
+}
+
+.toggle-switch::before {
+    content: '';
+    position: absolute;
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    background-color: white;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+}
+
+.toggle-switch.active {
+    background-color: var(--primary-color);
+}
+
+.toggle-switch.active::before {
+    transform: translateX(25px);
+}
+
+.sidebar.collapsed .logo-text,
+.sidebar.collapsed .search,
+.sidebar.collapsed nav li span,
+.sidebar.collapsed .toggle-text {
+    display: none;
+}
+
+.sidebar.collapsed .logo {
+    justify-content: center;
+}
+
+.sidebar.collapsed nav li {
+    justify-content: center;
+}
+
+.sidebar.collapsed nav li i {
+    margin-right: 0;
+}
+
+.main-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+header {
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.content-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    min-height: 100%;
+}
+
+footer {
+    background-color: var(--primary-color);
+    color: white;
+    text-align: center;
+    padding: 10px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+    }
+
+    .sidebar.collapsed {
+        width: 100%;
+    }
+
+    .main-container {
+        width: 100%;
+    }
+}
+
+/* loading css */
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #e0e0e0;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+
+
+ 
+
+  .logo-text {
+    color: #000000; /* Black color for 'Carbonoz' */
+    font-weight: bold;
+}
+
+.logo-text .highlight {
+    color: #DEAF0B; /* Yellow color for 'SolarAutopilot' */
+}
+  
+  
+  </style>
 </head>
 <body>
    
@@ -47,7 +323,14 @@
 
             <div class="main-content">
                 <div class="content-card">
-                    <h2>Charts</h2>
+                    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+                        <iframe 
+                            src="http://<%= grafanaUrl %>/grafana/d/solar_dashboard/solar-dashboard?orgId=1&theme=light" 
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
+                            frameborder="0">
+                        </iframe>
+                    </div>
+                
                   
                 </div>
             </div>
@@ -58,7 +341,34 @@
         </div>
     </div>
      
-<script src="/public/js/main.js"></script>
+    <script>
+        // toggle sidebar
+    
+    const sidebar = document.getElementById('sidebar');
+    const toggleSidebar = document.getElementById('toggleSidebar');
+    const toggleSwitch = document.getElementById('toggleSwitch');
+    
+    toggleSidebar.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+        toggleSwitch.classList.toggle('active');
+    });
+    
+    
+    // loading js
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const pageContent = document.getElementById('pageContent');
+      
+        // Simulate loading time (you can adjust this as needed)
+        setTimeout(() => {
+          loadingOverlay.style.display = 'none';
+          pageContent.style.display = 'block';
+          // Trigger a custom event to signal that the page is ready
+          document.dispatchEvent(new Event('pageReady'));
+        }, 1500); // 1.5 seconds loading time
+      });
+       </script>
    
 </body>
 </html>

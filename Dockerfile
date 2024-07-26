@@ -5,7 +5,9 @@ FROM $BUILD_FROM
 RUN \
   apk add --no-cache \
     nodejs \
-    npm
+    npm \
+    grafana \
+    sqlite
 
 # Copy root filesystem
 COPY rootfs /
@@ -20,10 +22,18 @@ RUN npm install
 # Copy data for add-on
 COPY . .
 
+# Copy Grafana configuration files
+COPY grafana/grafana.ini /etc/grafana/grafana.ini
+COPY grafana/provisioning /etc/grafana/provisioning
+
 # Make scripts executable
 RUN chmod a+x /etc/services.d/carbonoz/run \
     && chmod a+x /etc/services.d/carbonoz/finish \
     && chmod a+x /usr/bin/carbonoz.sh
+
+# Make Grafana data directory writable
+RUN mkdir -p /var/lib/grafana /data && \
+    chown -R nobody:nobody /var/lib/grafana /data
 
 # Build arguments
 ARG BUILD_ARCH
@@ -50,3 +60,9 @@ LABEL \
     org.opencontainers.image.created=${BUILD_DATE} \
     org.opencontainers.image.revision=${BUILD_REF} \
     org.opencontainers.image.version=${BUILD_VERSION}
+
+# Expose Grafana port
+EXPOSE 3000
+
+# Set entrypoint
+ENTRYPOINT ["/init"]

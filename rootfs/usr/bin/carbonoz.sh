@@ -15,6 +15,12 @@ export DATABASE_NAME=$(bashio::config 'database_name')
 export DATABASE_USERNAME=$(bashio::config 'database_username')
 export DATABASE_PASSWORD=$(bashio::config 'database_password')
 
+# Update Grafana configuration
+sed -i "s|^root_url = .*|root_url = ${INGRESS_PATH}|g" /etc/grafana/grafana.ini
+
+# Start Grafana
+grafana-server --config /etc/grafana/grafana.ini --homepath /usr/share/grafana &
+
 # Run the Node.js application
 cd /usr/src/app
 exec node server.js
