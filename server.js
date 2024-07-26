@@ -22,21 +22,6 @@ app.set('view engine', 'ejs');
 // Read configuration from Home Assistant add-on options
 const options = JSON.parse(fs.readFileSync('/data/options.json', 'utf8'));
 
-const httpProxy = require('http-proxy');
-const proxy = httpProxy.createProxyServer({});
-
-
-app.use('/grafana', (req, res) => {
-    proxy.web(req, res, { target: `http://${mqtt_host}:3000` }, (err) => {
-        console.error('Proxy error:', err);
-        res.status(500).send('Proxy error');
-    });
-});
-
-proxy.on('error', (err, req, res) => {
-    console.error('Proxy error:', err);
-    res.status(500).send('Proxy error');
-});
 
 // InfluxDB configuration
 const influxConfig = {
@@ -288,33 +273,11 @@ app.get('/api/messages', (req, res) => {
 });
 
 
-app.get('/chart', async (req, res) => {
-    try {
-        await new Promise((resolve, reject) => {
-            const grafanaUrl = `http://${mqtt_host}:3000/grafana`;
-            console.log(`Checking Grafana at: ${grafanaUrl}`);
-            
-            http.get(grafanaUrl, (resp) => {
-                console.log('Grafana response:', resp.statusCode);
-                if (resp.statusCode === 200) {
-                    resolve();
-                } else {
-                    reject(new Error(`Grafana returned status code ${resp.statusCode}`));
-                }
-            }).on('error', (err) => {
-                console.error('Error connecting to Grafana:', err.message);
-                reject(err);
-            });
-        });
-
-        res.render('chart', { 
-            ingress_path: process.env.INGRESS_PATH || '',
-            grafanaUrl: `http://${mqtt_host}:3000`
-        });
-    } catch (error) {
-        console.error('Error accessing Grafana:', error);
-        res.status(500).send('Error accessing Grafana: ' + error.message);
-    }
+app.get('/chart', (req, res) => {
+    res.render('chart', {
+        ingress_path: process.env.INGRESS_PATH || '',
+        mqtt_host: options.mqtt_host // Include mqtt_host here
+    });
 });
 
 app.get('/dashboard', async (req, res) => {
