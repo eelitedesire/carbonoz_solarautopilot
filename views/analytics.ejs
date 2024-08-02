@@ -573,16 +573,14 @@ footer {
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
     // Function to get data from table
     function getTableData(tableId) {
         const rows = document.querySelectorAll(`#${tableId} tbody tr`);
         let labels = [];
         let solarData = [];
         let loadData = [];
-        let batteryChargedData = [];
-        let batteryDischargedData = [];
         let gridUsedData = [];
         let gridExportedData = [];
 
@@ -591,13 +589,11 @@ footer {
             labels.push(cells[0].textContent.trim());
             solarData.push(parseFloat(cells[1].textContent));
             loadData.push(parseFloat(cells[2].textContent));
-            batteryChargedData.push(parseFloat(cells[3].textContent));
-            batteryDischargedData.push(parseFloat(cells[4].textContent));
             gridUsedData.push(parseFloat(cells[5].textContent));
             gridExportedData.push(parseFloat(cells[6].textContent));
         });
 
-        return { labels, solarData, loadData, batteryChargedData, batteryDischargedData, gridUsedData, gridExportedData };
+        return { labels, solarData, loadData, gridUsedData, gridExportedData };
     }
 
     // Function to update chart
@@ -628,8 +624,8 @@ footer {
 
     // Function to calculate Solar PV totals
     function calculateSolarPVTotals(data) {
-        let dailyTotal = data.solarData[0] || 0;
-        let weeklyTotal = data.solarData.slice(0, 7).reduce((sum, value) => sum + value, 0);
+        let dailyTotal = data.solarData[data.solarData.length - 1] || 0;
+        let weeklyTotal = data.solarData.slice(-7).reduce((sum, value) => sum + value, 0);
         let monthlyTotal = data.solarData.reduce((sum, value) => sum + value, 0);
 
         return { dailyTotal, weeklyTotal, monthlyTotal };
@@ -664,8 +660,6 @@ footer {
     updateChart('last-30-days-chart', last30DaysData.labels.reverse(), [
         { label: 'Solar PV', data: last30DaysData.solarData.reverse(), backgroundColor: '#FFA500' },
         { label: 'Load', data: last30DaysData.loadData.reverse(), backgroundColor: '#FF5722' },
-        { label: 'Battery Charged', data: last30DaysData.batteryChargedData.reverse(), backgroundColor: '#4CAF50' },
-        { label: 'Battery Discharged', data: last30DaysData.batteryDischargedData.reverse(), backgroundColor: '#2196F3' },
         { label: 'Grid Used', data: last30DaysData.gridUsedData.reverse(), backgroundColor: '#9C27B0' },
         { label: 'Grid Exported', data: last30DaysData.gridExportedData.reverse(), backgroundColor: '#607D8B' }
     ]);
@@ -677,8 +671,6 @@ footer {
     updateChart('last-12-months-chart', last12MonthsData.labels.reverse(), [
         { label: 'Solar PV', data: last12MonthsData.solarData.reverse(), backgroundColor: '#FFA500' },
         { label: 'Load', data: last12MonthsData.loadData.reverse(), backgroundColor: '#FF5722' },
-        { label: 'Battery Charged', data: last12MonthsData.batteryChargedData.reverse(), backgroundColor: '#4CAF50' },
-        { label: 'Battery Discharged', data: last12MonthsData.batteryDischargedData.reverse(), backgroundColor: '#2196F3' },
         { label: 'Grid Used', data: last12MonthsData.gridUsedData.reverse(), backgroundColor: '#9C27B0' },
         { label: 'Grid Exported', data: last12MonthsData.gridExportedData.reverse(), backgroundColor: '#607D8B' }
     ]);
@@ -707,6 +699,7 @@ footer {
     const loadingOverlay = document.getElementById('loadingOverlay');
     loadingOverlay.style.display = 'none';
 });
-    </script>
+</script>
+
 </body>
 </html>
