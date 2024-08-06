@@ -17,4 +17,5 @@ const disconnectDatabase = async () => {
   console.log('Database disconnected')
 }
 
-export { prisma, connectDatabase, disconnectDatabase }
+
+module.exports= {prisma, connectDatabase, disconnectDatabase}
