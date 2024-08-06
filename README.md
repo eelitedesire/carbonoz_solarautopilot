@@ -30,10 +30,8 @@ This add-on provides a comprehensive solution for managing and monitoring solar 
 Follow these steps to install the add-on:
 
 1. Navigate to the Home Assistant Add-on Store.
-2. Click on the three dots in the top right corner and select "Repositories".
-3. Add the URL of this repository: `https://github.com/eelitedesire/carbonoz_solarautopilot`
-4. Find the "Carbonoz SolarAutopilot" add-on in the list and click on it.
-5. Click on "Install".
+2. Find the "Carbonoz SolarAutopilot" add-on in the list and click on it.
+3. Click on "Install".
 
 ## Configuration
 
