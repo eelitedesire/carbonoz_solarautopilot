@@ -4183,6 +4183,7 @@
     },
     "timezone": "Indian/Mauritius",
     "title": "Charts",
-    "uid": "sa-charts",
-    "version": 49
+    "uid": "solar_dashboard",
+    "version": 24,
+    "weekStart": ""
   }
