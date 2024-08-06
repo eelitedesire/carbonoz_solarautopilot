@@ -184,7 +184,6 @@ const MAX_BUFFER_SIZE = 1000; // Adjust based on your needs
 const FLUSH_INTERVAL = 5000; // 5 seconds
 
 async function saveMessageToInfluxDB(topic, message) {
-<<<<<<< HEAD
     try {
         const parsedMessage = parseFloat(message.toString());
         
@@ -276,13 +275,11 @@ async function verifySavedValue(topic, expectedValue) {
         }
     } catch (error) {
         console.error(`Error verifying saved value for topic ${topic}:`, error.toString());
-=======
   try {
     const parsedMessage = parseFloat(message.toString())
 
     if (isNaN(parsedMessage)) {
       return
->>>>>>> 0e4cdf681e89c33892739e65486e715fb053bb7e
     }
 
     const timestamp = new Date().getTime()
@@ -308,6 +305,7 @@ async function verifySavedValue(topic, expectedValue) {
       err.response ? err.response.body : err.message
     )
   }
+}
 }
 
 // Set up interval to periodically flush the buffer
