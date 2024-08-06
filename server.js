@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const Influx = require('influx');
 const ejs = require('ejs');
-const moment = require('moment');
+const moment = require('moment-timezone');
 const WebSocket = require('ws');
 const { http } = require('follow-redirects');
 const retry = require('async-retry');
@@ -170,12 +170,14 @@ async function saveMessageToInfluxDB(topic, message) {
             return;
         }
 
-        const timestamp = new Date().getTime();
+        // Use Mauritius time
+        const timestamp = moment().tz('Indian/Mauritius').valueOf();
+        
         const dataPoint = {
             measurement: 'state',
             fields: { value: parsedMessage },
             tags: { topic: topic },
-            timestamp: timestamp * 1000000,
+            timestamp: timestamp * 1000000, // Convert to nanoseconds
         };
 
         await retry(async () => {
@@ -184,6 +186,7 @@ async function saveMessageToInfluxDB(topic, message) {
             retries: 5,
             minTimeout: 1000
         });
+
     } catch (err) {
         console.error('Error saving message to InfluxDB:', err.response ? err.response.body : err.message);
     }
