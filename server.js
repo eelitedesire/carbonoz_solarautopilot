@@ -15,7 +15,7 @@ const { http } = require('follow-redirects')
 const cors = require('cors')
 const socketIO = require('socket.io')
 const httpServer = require('http')
-const { connectDatabase, prisma } = require('./config/mongodb')
+const { connectDatabase,prisma } = require('./config/mongodb')
 
 
 
