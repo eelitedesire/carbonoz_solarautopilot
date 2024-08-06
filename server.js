@@ -7,7 +7,6 @@ const Influx = require('influx');
 const ejs = require('ejs');
 const moment = require('moment-timezone');
 const WebSocket = require('ws');
-const { http } = require('follow-redirects');
 const retry = require('async-retry');
 
 const app = express();
