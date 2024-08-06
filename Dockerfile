@@ -10,17 +10,23 @@ RUN \
     sqlite
 
 # Copy root filesystem
+
 COPY rootfs /
 
 # Set work directory
 WORKDIR /usr/src/app
 
+
+RUN apt-get update && apt-get install -y openssl libssl-dev
+RUN npm install --frozen-lockfile
 # Copy package.json and install node modules
 COPY package.json .
 RUN npm install
 
 # Copy data for add-on
 COPY . .
+
+RUN yarn prisma:generate
 
 # Copy Grafana configuration files
 COPY grafana/grafana.ini /etc/grafana/grafana.ini

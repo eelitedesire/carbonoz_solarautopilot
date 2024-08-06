@@ -23,4 +23,8 @@ grafana-server --config /etc/grafana/grafana.ini --homepath /usr/share/grafana &
 
 # Run the Node.js application
 cd /usr/src/app
+
+# Run Prisma to generate client code
+npx prisma generate
+
 exec node server.js

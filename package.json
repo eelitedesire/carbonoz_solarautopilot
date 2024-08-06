@@ -4,7 +4,8 @@
   "description": "CARBONOZ SolarAutopilot for Home Assistant",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "prisma:generate": "npx prisma generate dev"
   },
   "dependencies": {
     "@prisma/client": "^5.17.0",
