@@ -1,9 +1,10 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
+FROM node:18
 
 # Install requirements for add-on
 RUN \
-  apk add --no-cache \
+    apk add --no-cache \
     nodejs \
     npm \
     grafana \
