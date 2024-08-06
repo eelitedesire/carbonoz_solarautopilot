@@ -162,45 +162,76 @@ function updateSystemState(topic, message) {
 }
 
 // Save MQTT message to InfluxDB
-let counter = 0;
+let messageBuffer = [];
+let isProcessing = false;
+const MAX_BUFFER_SIZE = 1000; // Adjust based on your needs
+const FLUSH_INTERVAL = 5000; // 5 seconds
 
 async function saveMessageToInfluxDB(topic, message) {
     try {
-        // Use parseFloat to maintain decimal precision
         const parsedMessage = parseFloat(message.toString());
-
+        
         if (isNaN(parsedMessage)) {
             console.warn(`Invalid numeric value received for topic ${topic}: ${message}`);
             return;
         }
 
-        // Create a timestamp with microsecond precision and a counter
-        const baseTimestamp = moment().tz('Indian/Mauritius').valueOf() * 1000; // microsecond precision
-        const timestamp = baseTimestamp + (counter % 1000);
-        counter = (counter + 1) % 1000;
+        const timestamp = moment().tz('Indian/Mauritius').valueOf() * 1000000; // nanosecond precision
 
-        const dataPoint = {
+        const point = {
             measurement: 'state',
+            tags: { topic: topic },
             fields: { 
                 value: parsedMessage,
-                raw_value: message.toString() // Store the original string value
+                raw_value: message.toString()
             },
-            tags: { topic: topic },
-            timestamp: timestamp,
+            timestamp: timestamp
         };
 
+        messageBuffer.push(point);
+
+        if (messageBuffer.length >= MAX_BUFFER_SIZE) {
+            await flushBuffer();
+        }
+    } catch (err) {
+        console.error('Error preparing message for InfluxDB:', err);
+    }
+}
+
+async function flushBuffer() {
+    if (isProcessing || messageBuffer.length === 0) return;
+
+    isProcessing = true;
+    const currentBuffer = [...messageBuffer];
+    messageBuffer = [];
+
+    try {
         await retry(async () => {
-            await influx.writePoints([dataPoint]);
+            await influx.writePoints(currentBuffer, {
+                precision: 'n' // nanosecond precision
+            });
         }, {
             retries: 5,
-            minTimeout: 1000
+            factor: 2,
+            minTimeout: 1000,
+            maxTimeout: 60000,
+            onRetry: (error) => {
+                console.warn('Retrying InfluxDB write due to error:', error);
+            }
         });
 
-        // Verify the saved value
-        await verifySavedValue(topic, message.toString());
+        console.log(`Successfully wrote ${currentBuffer.length} points to InfluxDB`);
 
-    } catch (err) {
-        console.error('Error saving message to InfluxDB:', err.response ? err.response.body : err.message);
+        // Verify saved values
+        for (const point of currentBuffer) {
+            await verifySavedValue(point.tags.topic, point.fields.value.toString());
+        }
+    } catch (error) {
+        console.error('Error writing to InfluxDB:', error);
+        // On error, add points back to the buffer
+        messageBuffer.unshift(...currentBuffer);
+    } finally {
+        isProcessing = false;
     }
 }
 
@@ -212,8 +243,17 @@ async function verifySavedValue(topic, expectedValue) {
             WHERE "topic" = '${topic}'
         `;
         const result = await influx.query(query);
-        if (result && result[0]) {
-            console.log(`Verification - Topic: ${topic}, Expected: ${expectedValue}, Saved Value: ${result[0].last}, Saved Raw: ${result[0].last_raw_value}`);
+        
+        if (result && result.length > 0) {
+            const savedValue = result[0].last.toString();
+            const savedRawValue = result[0].last_raw_value;
+            
+            if (savedValue === expectedValue) {
+                console.log(`Verification successful - Topic: ${topic}, Value: ${savedValue}`);
+            } else {
+                console.warn(`Verification failed - Topic: ${topic}, Expected: ${expectedValue}, Saved: ${savedValue}, Raw: ${savedRawValue}`);
+                // Implement recovery logic here if needed
+            }
         } else {
             console.log(`Verification - No data found for topic: ${topic}`);
         }
@@ -221,6 +261,18 @@ async function verifySavedValue(topic, expectedValue) {
         console.error(`Error verifying saved value for topic ${topic}:`, error.toString());
     }
 }
+
+// Set up interval to periodically flush the buffer
+setInterval(flushBuffer, FLUSH_INTERVAL);
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+    console.log('Shutting down...');
+    await flushBuffer();
+    process.exit(0);
+});
+
+module.exports = saveMessageToInfluxDB;
 
 // Fetch current value from InfluxDB
 async function getCurrentValue(topic) {
