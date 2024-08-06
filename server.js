@@ -12,17 +12,7 @@ const retry = require('async-retry');
 
 const app = express();
 const port = process.env.PORT || 6789;
-const express = require('express')
-const bodyParser = require('body-parser')
-const mqtt = require('mqtt')
-const fs = require('fs')
-const path = require('path')
-const Influx = require('influx')
-const ejs = require('ejs')
-const moment = require('moment')
-const WebSocket = require('ws')
 const { http } = require('follow-redirects')
-const retry = require('async-retry')
 const cors = require('cors')
 const socketIO = require('socket.io')
 const httpServer = require('http')
