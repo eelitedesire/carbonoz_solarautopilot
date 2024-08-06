@@ -1,6 +1,5 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
-FROM node:18
 
 # Install requirements for add-on
 RUN \
