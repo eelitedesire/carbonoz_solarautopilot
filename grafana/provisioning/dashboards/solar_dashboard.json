@@ -1542,7 +1542,7 @@
         "bars": false,
         "dashLength": 10,
         "dashes": false,
-        "datasource": "SolarAssistant",
+        "datasource": "InfluxDB",
         "description": "",
         "fieldConfig": {
           "defaults": {
