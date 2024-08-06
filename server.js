@@ -9,6 +9,7 @@ const moment = require('moment-timezone');
 const WebSocket = require('ws');
 const { http } = require('follow-redirects');
 const retry = require('async-retry');
+const crypto = require('crypto');
 
 const app = express();
 const port = process.env.PORT || 6789;
@@ -162,22 +163,31 @@ function updateSystemState(topic, message) {
 }
 
 // Save MQTT message to InfluxDB
+let counter = 0;
+
 async function saveMessageToInfluxDB(topic, message) {
     try {
+        // Use parseFloat to maintain decimal precision
         const parsedMessage = parseFloat(message.toString());
 
         if (isNaN(parsedMessage)) {
+            console.warn(`Invalid numeric value received for topic ${topic}: ${message}`);
             return;
         }
 
-        // Use Mauritius time
-        const timestamp = moment().tz('Indian/Mauritius').valueOf();
-        
+        // Create a timestamp with microsecond precision and a counter
+        const baseTimestamp = moment().tz('Indian/Mauritius').valueOf() * 1000; // microsecond precision
+        const timestamp = baseTimestamp + (counter % 1000);
+        counter = (counter + 1) % 1000;
+
         const dataPoint = {
             measurement: 'state',
-            fields: { value: parsedMessage },
+            fields: { 
+                value: parsedMessage,
+                raw_value: message.toString() // Store the original string value
+            },
             tags: { topic: topic },
-            timestamp: timestamp * 1000000, // Convert to nanoseconds
+            timestamp: timestamp,
         };
 
         await retry(async () => {
@@ -187,8 +197,29 @@ async function saveMessageToInfluxDB(topic, message) {
             minTimeout: 1000
         });
 
+        // Verify the saved value
+        await verifySavedValue(topic, message.toString());
+
     } catch (err) {
         console.error('Error saving message to InfluxDB:', err.response ? err.response.body : err.message);
+    }
+}
+
+async function verifySavedValue(topic, expectedValue) {
+    try {
+        const query = `
+            SELECT last("value"), last("raw_value")
+            FROM "state"
+            WHERE "topic" = '${topic}'
+        `;
+        const result = await influx.query(query);
+        if (result && result[0]) {
+            console.log(`Verification - Topic: ${topic}, Expected: ${expectedValue}, Saved Value: ${result[0].last}, Saved Raw: ${result[0].last_raw_value}`);
+        } else {
+            console.log(`Verification - No data found for topic: ${topic}`);
+        }
+    } catch (error) {
+        console.error(`Error verifying saved value for topic ${topic}:`, error.toString());
     }
 }
 
