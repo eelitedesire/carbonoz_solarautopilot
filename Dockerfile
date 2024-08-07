@@ -7,23 +7,25 @@ RUN \
     nodejs \
     npm \
     grafana \
-    sqlite
+    sqlite \
+    openssl \
+    openssl-dev
 
 # Copy root filesystem
-
 COPY rootfs /
 
 # Set work directory
 WORKDIR /usr/src/app
 
-# Copy package.json and install node modules
+# Install npm dependencies
 COPY package.json .
-RUN npm install
+RUN npm install --frozen-lockfile
 
 # Copy data for add-on
 COPY . .
 
-RUN yarn prisma:generate
+# Generate Prisma client
+RUN npx prisma generate
 
 # Copy Grafana configuration files
 COPY grafana/grafana.ini /etc/grafana/grafana.ini
