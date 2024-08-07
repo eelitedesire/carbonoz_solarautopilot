@@ -16,9 +16,6 @@ COPY rootfs /
 # Set work directory
 WORKDIR /usr/src/app
 
-
-RUN apt-get update && apt-get install -y openssl libssl-dev
-RUN npm install --frozen-lockfile
 # Copy package.json and install node modules
 COPY package.json .
 RUN npm install
