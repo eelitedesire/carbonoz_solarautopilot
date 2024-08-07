@@ -974,7 +974,7 @@ app.use((req, res, next) => {
 const IOserver = httpServer.createServer(app)
 const io = socketIO(IOserver, {
   cors: {
-    origin: 'http://192.168.160.185',
+    origin: '*',
   },
 })
 
