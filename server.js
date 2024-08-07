@@ -975,11 +975,13 @@ const IOserver = httpServer.createServer(app)
 const io = socketIO(IOserver, {
   cors: {
     origin: '*',
+    methods: ['GET', 'POST'],
   },
 })
 
 //socket on connection
 io.on('connection', (socket) => {
+  console.log('connection ok')
   const getRealTimeData = async () => {
     const loadPowerData = await getCurrentValue(
       'solar_assistant_DEYE/total/load_energy/state'
