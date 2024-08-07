@@ -20,7 +20,11 @@ const { connectDatabase,prisma } = require('./config/mongodb')
 
 
 // Middleware setup
-app.use(cors())
+app.use(cors(
+  {origin: '*', 
+  methods: ['GET', 'POST'],
+  allowedHeaders: '*',}
+))
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(express.static('public'))
@@ -52,7 +56,7 @@ let mqttClient
 let incomingMessages = []
 const MAX_MESSAGES = 100
 
-function connectToMqtt(isSocket) {
+function connectToMqtt() {
   mqttClient = mqtt.connect(`mqtt://${mqttConfig.host}:${mqttConfig.port}`, {
     username: mqttConfig.username,
     password: mqttConfig.password,
@@ -931,45 +935,6 @@ function compareNumeric(actual, operator, expected) {
   }
 }
 
-// WebSocket setup
-const server = app.listen(port, '0.0.0.0', async () => {
-  console.log(`Server is running on http://0.0.0.0:${port}`)
-  connectToMqtt()
-  connectDatabase()
-    .then(() => console.log('Database connected'))
-    .catch((err) => console.log({ err }))
-})
-
-const wss = new WebSocket.Server({ server })
-
-wss.on('connection', (ws) => {
-  console.log('Client connected')
-  ws.on('close', () => console.log('Client disconnected'))
-})
-
-function broadcastMessage(message) {
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(message))
-    }
-  })
-}
-
-// Scheduled tasks
-setInterval(applyScheduledSettings, 60000) // Run every minute
-setInterval(applyAutomationRules, 60000) // Run every minute
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack)
-  res.status(500).json({ error: 'Something went wrong!' })
-})
-
-// 404 handler
-app.use((req, res, next) => {
-  res.status(404).send("Sorry, that route doesn't exist.")
-})
-
 //socket server setup
 const IOserver = httpServer.createServer(app)
 const io = socketIO(IOserver, {
@@ -982,7 +947,8 @@ const io = socketIO(IOserver, {
 //socket on connection
 io.on('connection', (socket) => {
   console.log('connection ok')
-  const getRealTimeData = async () => {
+  try {
+    const getRealTimeData = async () => {
     const loadPowerData = await getCurrentValue(
       'solar_assistant_DEYE/total/load_energy/state'
     )
@@ -1053,6 +1019,51 @@ io.on('connection', (socket) => {
       })
     })
   })
+  } catch (error) {
+    console.error('Error processing MQTT message:', error)
+  }
 })
+
+// WebSocket setup
+
+const server = IOserver.listen(port, '0.0.0.0', async () => {
+  console.log(`Server is running on http://0.0.0.0:${port}`)
+  connectToMqtt()
+  connectDatabase()
+    .then(() => console.log('Database connected'))
+    .catch((err) => console.log({ err }))
+})
+
+const wss = new WebSocket.Server({ server })
+
+wss.on('connection', (ws) => {
+  console.log('Client connected')
+  ws.on('close', () => console.log('Client disconnected'))
+})
+
+function broadcastMessage(message) {
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(message))
+    }
+  })
+}
+
+// Scheduled tasks
+setInterval(applyScheduledSettings, 60000) // Run every minute
+setInterval(applyAutomationRules, 60000) // Run every minute
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack)
+  res.status(500).json({ error: 'Something went wrong!' })
+})
+
+// 404 handler
+app.use((req, res, next) => {
+  res.status(404).send("Sorry, that route doesn't exist.")
+})
+
+
 
 module.exports = { app, server }
