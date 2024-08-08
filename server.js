@@ -319,7 +319,7 @@ async function getCurrentValue(topic) {
         SELECT mean("value") AS "value"
         FROM "state"
         WHERE "topic" = '${topic}'
-        AND time >= now() - 2d
+        AND time >= now() - 1d
         GROUP BY time(1d) tz('Indian/Mauritius')
     `;
   try {
