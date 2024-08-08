@@ -358,252 +358,220 @@ footer {
         </div>
     </div>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-   <script>
-    // Fetch energy data from the API
-async function fetchEnergyData() {
-    try {
-        const response = await fetch('<%= ingress_path %>/api/energy?range=48h');
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+      <script>
+    async function fetchTodayEnergyData() {
+        try {
+            const response = await fetch('<%= ingress_path %>/api/energy');
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            return null;
         }
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        document.getElementById('error-message').textContent = 'Failed to load energy data. Please try again later.';
-        return null;
     }
-}
 
-// Generate labels for the last 48 hours
-function getLastFortyEightHours() {
-    const hours = [];
-    const now = new Date();
-    for (let i = 47; i >= 0; i--) {
-        let d = new Date(now);
-        d.setHours(d.getHours() - i);
-        hours.push(d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }));
+    function getLastTwentyFourHours() {
+        const hours = [];
+        const now = new Date();
+        for (let i = 23; i >= 0; i--) {
+            let d = new Date(now);
+            d.setHours(d.getHours() - i);
+            hours.push(d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }));
+        }
+        return hours;
     }
-    return hours;
-}
 
-// Update the energy distribution diagram
-function updateEnergyDistributionDiagram(data) {
-    d3.select("#energy-flow-diagram").html("");
-    const width = 400;
-    const height = 300;
-    const svg = d3.select("#energy-flow-diagram")
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height);
+    function updateEnergyDistributionDiagram(data) {
+        d3.select("#energy-flow-diagram").html("");
+        const width = 400;
+        const height = 300;
+        const svg = d3.select("#energy-flow-diagram")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
 
-    const nodes = [
-        { id: "solar", label: "Solar", value: data.solarProduction, icon: "☀️" },
-        { id: "grid", label: "Grid", value: data.gridIn - data.gridOut, icon: "🏭" },
-        { id: "battery", label: "Battery", value: data.batteryDischarged - data.batteryCharged, icon: "🔋" },
-        { id: "home", label: "Home", value: data.totalConsumption, icon: "🏠" }
-    ];
+        const nodes = [
+            { id: "solar", label: "Solar", value: data.solarProduction, icon: "☀️" },
+            { id: "grid", label: "Grid", value: data.gridIn - data.gridOut, icon: "🏭" },
+            { id: "battery", label: "Battery", value: data.batteryDischarged - data.batteryCharged, icon: "🔋" },
+            { id: "home", label: "Home", value: data.totalConsumption, icon: "🏠" }
+        ];
 
-    const links = [
-        { source: "solar", target: "home", value: Math.min(data.solarProduction, data.totalConsumption) },
-        { source: "grid", target: "home", value: Math.max(0, data.gridIn - data.gridOut) },
-        { source: "battery", target: "home", value: Math.max(0, data.batteryDischarged - data.batteryCharged) },
-        { source: "solar", target: "battery", value: Math.max(0, data.solarProduction - data.totalConsumption) },
-        { source: "solar", target: "grid", value: Math.max(0, data.solarProduction - data.totalConsumption - (data.batteryCharged - data.batteryDischarged)) }
-    ];
+        const links = [
+            { source: "solar", target: "home", value: Math.min(data.solarProduction, data.totalConsumption) },
+            { source: "grid", target: "home", value: Math.max(0, data.gridIn - data.gridOut) },
+            { source: "battery", target: "home", value: Math.max(0, data.batteryDischarged - data.batteryCharged) },
+            { source: "solar", target: "battery", value: Math.max(0, data.solarProduction - data.totalConsumption) },
+            { source: "solar", target: "grid", value: Math.max(0, data.solarProduction - data.totalConsumption - (data.batteryCharged - data.batteryDischarged)) }
+        ];
 
-    const nodeElements = svg.selectAll(".node")
-        .data(nodes)
-        .enter().append("g")
-        .attr("class", "node")
-        .attr("transform", (d, i) => `translate(${100 + (i % 2) * 200}, ${50 + Math.floor(i / 2) * 200})`);
+        const nodeElements = svg.selectAll(".node")
+            .data(nodes)
+            .enter().append("g")
+            .attr("class", "node")
+            .attr("transform", (d, i) => `translate(${100 + (i % 2) * 200}, ${50 + Math.floor(i / 2) * 200})`);
 
-    nodeElements.append("circle")
-        .attr("r", 40)
-        .attr("fill", "transparent")
-        .attr("stroke", d => d.id === "solar" ? "#FFA500" : 
-                             d.id === "grid" ? "#4CAF50" : 
-                             d.id === "battery" ? "#2196F3" : "#FF5722")
-        .attr("stroke-width", 3);
+        nodeElements.append("circle")
+            .attr("r", 40)
+            .attr("fill", "transparent")
+            .attr("stroke", d => d.id === "solar" ? "#FFA500" : 
+                                 d.id === "grid" ? "#4CAF50" : 
+                                 d.id === "battery" ? "#2196F3" : "#FF5722")
+            .attr("stroke-width", 3);
 
-    nodeElements.append("text")
-        .attr("text-anchor", "middle")
-        .attr("dy", "-1em")
-        .text(d => d.icon);
+        nodeElements.append("text")
+            .attr("text-anchor", "middle")
+            .attr("dy", "-1em")
+            .text(d => d.icon);
 
-    nodeElements.append("text")
-        .attr("text-anchor", "middle")
-        .attr("dy", "2em")
-        .text(d => `${d.label}: ${Math.abs(d.value).toFixed(1)} kWh`);
+        nodeElements.append("text")
+            .attr("text-anchor", "middle")
+            .attr("dy", "2em")
+            .text(d => `${d.label}: ${Math.abs(d.value).toFixed(1)} kWh`);
 
-    const linkElements = svg.selectAll(".link")
-        .data(links)
-        .enter().append("path")
-        .attr("class", "link")
-        .attr("d", d => {
-            const sourceNode = nodes.find(n => n.id === d.source);
-            const targetNode = nodes.find(n => n.id === d.target);
-            const sourceX = 100 + (nodes.indexOf(sourceNode) % 2) * 200;
-            const sourceY = 50 + Math.floor(nodes.indexOf(sourceNode) / 2) * 200;
-            const targetX = 100 + (nodes.indexOf(targetNode) % 2) * 200;
-            const targetY = 50 + Math.floor(nodes.indexOf(targetNode) / 2) * 200;
-            return `M${sourceX},${sourceY} L${targetX},${targetY}`;
-        })
-        .attr("stroke", d => d.source === "solar" ? "#FFA500" : 
-                              d.source === "grid" ? "#4CAF50" : 
-                              d.source === "battery" ? "#2196F3" : "#FF5722")
-        .attr("stroke-width", d => Math.max(1, d.value / 5))
-        .attr("fill", "none");
+        const linkElements = svg.selectAll(".link")
+            .data(links)
+            .enter().append("path")
+            .attr("class", "link")
+            .attr("d", d => {
+                const sourceNode = nodes.find(n => n.id === d.source);
+                const targetNode = nodes.find(n => n.id === d.target);
+                const sourceX = 100 + (nodes.indexOf(sourceNode) % 2) * 200;
+                const sourceY = 50 + Math.floor(nodes.indexOf(sourceNode) / 2) * 200;
+                const targetX = 100 + (nodes.indexOf(targetNode) % 2) * 200;
+                const targetY = 50 + Math.floor(nodes.indexOf(targetNode) / 2) * 200;
+                return `M${sourceX},${sourceY} L${targetX},${targetY}`;
+            })
+            .attr("stroke", d => d.source === "solar" ? "#FFA500" : 
+                                  d.source === "grid" ? "#4CAF50" : 
+                                  d.source === "battery" ? "#2196F3" : "#FF5722")
+            .attr("stroke-width", d => Math.max(1, d.value / 5))
+            .attr("fill", "none");
 
-    svg.append("defs").selectAll("marker")
-        .data(["end"])
-        .enter().append("marker")
-        .attr("id", String)
-        .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 15)
-        .attr("refY", -1.5)
-        .attr("markerWidth", 6)
-        .attr("markerHeight", 6)
-        .attr("orient", "auto")
-        .append("path")
-        .attr("d", "M0,-5L10,0L0,5")
-        .attr("fill", "#ffffff");
+        svg.append("defs").selectAll("marker")
+            .data(["end"])
+            .enter().append("marker")
+            .attr("id", String)
+            .attr("viewBox", "0 -5 10 10")
+            .attr("refX", 15)
+            .attr("refY", -1.5)
+            .attr("markerWidth", 6)
+            .attr("markerHeight", 6)
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M0,-5L10,0L0,5")
+            .attr("fill", "#ffffff");
 
-    linkElements.attr("marker-end", "url(#end)");
-}
+        linkElements.attr("marker-end", "url(#end)");
+    }
 
-// Update the energy usage chart
-function updateEnergyUsageChart(data) {
-    const ctx = document.getElementById('energy-usage-chart').getContext('2d');
-    const hours = getLastFortyEightHours();
-    
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: hours,
-            datasets: [
-                {
-                    label: 'Solar',
+    function updateEnergyUsageChart(data) {
+        const ctx = document.getElementById('energy-usage-chart').getContext('2d');
+        const hours = getLastTwentyFourHours();
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: hours,
+                datasets: [
+                    {
+                        label: 'Solar',
+                        data: data.hourlyData.map(d => d.solar),
+                        backgroundColor: '#FFA500'
+                    },
+                    {
+                        label: 'Grid',
+                        data: data.hourlyData.map(d => d.grid),
+                        backgroundColor: '#4CAF50'
+                    },
+                    {
+                        label: 'Battery',
+                        data: data.hourlyData.map(d => d.battery),
+                        backgroundColor: '#2196F3'
+                    },
+                    {
+                        label: 'Load',
+                        data: data.hourlyData.map(d => d.load),
+                        backgroundColor: '#FF5722'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { 
+                        stacked: true,
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    },
+                    y: { 
+                        stacked: true,
+                        title: { display: true, text: 'kWh' }
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Energy Usage (Last 24 Hours)' }
+                }
+            }
+        });
+    }
+
+    function updateSolarProductionChart(data) {
+        const ctx = document.getElementById('solar-production-chart').getContext('2d');
+        const hours = getLastTwentyFourHours();
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: hours,
+                datasets: [{
+                    label: 'Solar Production',
                     data: data.hourlyData.map(d => d.solar),
                     backgroundColor: '#FFA500'
-                },
-                {
-                    label: 'Grid',
-                    data: data.hourlyData.map(d => d.grid),
-                    backgroundColor: '#4CAF50'
-                },
-                {
-                    label: 'Battery',
-                    data: data.hourlyData.map(d => d.battery),
-                    backgroundColor: '#2196F3'
-                },
-                {
-                    label: 'Load',
-                    data: data.hourlyData.map(d => d.load),
-                    backgroundColor: '#FF5722'
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: { 
-                    stacked: true,
-                    ticks: {
-                        maxRotation: 45,
-                        minRotation: 45
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    },
+                    y: { 
+                        beginAtZero: true,
+                        title: { display: true, text: 'kWh' }
                     }
                 },
-                y: { 
-                    stacked: true,
-                    title: { display: true, text: 'kWh' }
+                plugins: {
+                    legend: { display: false },
+                    title: { display: true, text: 'Solar Production (Last 24 Hours)' }
                 }
-            },
-            plugins: {
-                legend: { position: 'top' },
-                title: { display: true, text: 'Energy Usage (Last 48 Hours)' }
             }
-        }
-    });
-}
-
-// Update the solar production chart
-function updateSolarProductionChart(data) {
-    const ctx = document.getElementById('solar-production-chart').getContext('2d');
-    const hours = getLastFortyEightHours();
-
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: hours,
-            datasets: [{
-                label: 'Solar Production',
-                data: data.hourlyData.map(d => d.solar),
-                backgroundColor: '#FFA500'
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: {
-                    ticks: {
-                        maxRotation: 45,
-                        minRotation: 45
-                    }
-                },
-                y: { 
-                    beginAtZero: true,
-                    title: { display: true, text: 'kWh' }
-                }
-            },
-            plugins: {
-                legend: { display: false },
-                title: { display: true, text: 'Solar Production (Last 48 Hours)' }
-            }
-        }
-    });
-}
-
-// Main function to update the dashboard
-async function updateDashboard() {
-    const data = await fetchEnergyData();
-    console.log('Fetched data:', data);
-    if (data) {
-        updateEnergyUsageChart(data);
-        updateSolarProductionChart(data);
-        updateEnergyDistributionDiagram(data);
+        });
     }
-}
 
-// Event listener for when the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', () => {
-    updateDashboard();
-    setInterval(updateDashboard, 300000); // Update every 5 minutes
-});
+    async function updateDashboard() {
+        const data = await fetchTodayEnergyData();
+        if (data) {
+            updateEnergyUsageChart(data);
+            updateSolarProductionChart(data);
+            updateEnergyDistributionDiagram(data);
+        }
+    }
 
-// Sidebar toggle functionality
-const sidebar = document.getElementById('sidebar');
-const toggleSidebar = document.getElementById('toggleSidebar');
-const toggleSwitch = document.getElementById('toggleSwitch');
+    document.addEventListener('DOMContentLoaded', () => {
+        updateDashboard();
+        setInterval(updateDashboard, 300000); // Update every 5 minutes
+    });
+    </script>
 
-toggleSidebar.addEventListener('click', () => {
-    sidebar.classList.toggle('collapsed');
-    toggleSwitch.classList.toggle('active');
-});
-
-// Loading overlay functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const pageContent = document.getElementById('pageContent');
-
-    // Simulate loading time (you can adjust this as needed)
-    setTimeout(() => {
-        loadingOverlay.style.display = 'none';
-        pageContent.style.display = 'block';
-        // Trigger a custom event to signal that the page is ready
-        document.dispatchEvent(new Event('pageReady'));
-    }, 1500); // 1.5 seconds loading time
-});
-   </script>
   
 </body>
 </html>
