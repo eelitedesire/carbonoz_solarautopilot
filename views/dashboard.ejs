@@ -360,9 +360,9 @@ footer {
     <script src="https://d3js.org/d3.v7.min.js"></script>
    <script>
     // Fetch energy data from the API
-async function fetchTodayEnergyData() {
+async function fetchEnergyData() {
     try {
-        const response = await fetch('<%= ingress_path %>/api/energy');
+        const response = await fetch('<%= ingress_path %>/api/energy?range=48h');
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
@@ -374,11 +374,11 @@ async function fetchTodayEnergyData() {
     }
 }
 
-// Generate labels for the last 24 hours
-function getLastTwentyFourHours() {
+// Generate labels for the last 48 hours
+function getLastFortyEightHours() {
     const hours = [];
     const now = new Date();
-    for (let i = 23; i >= 0; i--) {
+    for (let i = 47; i >= 0; i--) {
         let d = new Date(now);
         d.setHours(d.getHours() - i);
         hours.push(d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }));
@@ -474,7 +474,7 @@ function updateEnergyDistributionDiagram(data) {
 // Update the energy usage chart
 function updateEnergyUsageChart(data) {
     const ctx = document.getElementById('energy-usage-chart').getContext('2d');
-    const hours = getLastTwentyFourHours();
+    const hours = getLastFortyEightHours();
     
     new Chart(ctx, {
         type: 'bar',
@@ -520,7 +520,7 @@ function updateEnergyUsageChart(data) {
             },
             plugins: {
                 legend: { position: 'top' },
-                title: { display: true, text: 'Energy Usage (Last 24 Hours)' }
+                title: { display: true, text: 'Energy Usage (Last 48 Hours)' }
             }
         }
     });
@@ -529,7 +529,7 @@ function updateEnergyUsageChart(data) {
 // Update the solar production chart
 function updateSolarProductionChart(data) {
     const ctx = document.getElementById('solar-production-chart').getContext('2d');
-    const hours = getLastTwentyFourHours();
+    const hours = getLastFortyEightHours();
 
     new Chart(ctx, {
         type: 'bar',
@@ -557,7 +557,7 @@ function updateSolarProductionChart(data) {
             },
             plugins: {
                 legend: { display: false },
-                title: { display: true, text: 'Solar Production (Last 24 Hours)' }
+                title: { display: true, text: 'Solar Production (Last 48 Hours)' }
             }
         }
     });
@@ -565,7 +565,7 @@ function updateSolarProductionChart(data) {
 
 // Main function to update the dashboard
 async function updateDashboard() {
-    const data = await fetchTodayEnergyData();
+    const data = await fetchEnergyData();
     console.log('Fetched data:', data);
     if (data) {
         updateEnergyUsageChart(data);
@@ -574,27 +574,9 @@ async function updateDashboard() {
     }
 }
 
-// Mock data for testing
-const mockData = {
-    hourlyData: Array(24).fill().map(() => ({
-        solar: Math.random() * 5,
-        grid: Math.random() * 3,
-        battery: Math.random() * 2,
-        load: Math.random() * 4
-    })),
-    solarProduction: 50,
-    gridIn: 20,
-    gridOut: 5,
-    batteryDischarged: 10,
-    batteryCharged: 15,
-    totalConsumption: 60
-};
-
 // Event listener for when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
     updateDashboard();
-    // Uncomment the next line to use mock data instead of fetching from API
-    // updateDashboard(mockData);
     setInterval(updateDashboard, 300000); // Update every 5 minutes
 });
 
