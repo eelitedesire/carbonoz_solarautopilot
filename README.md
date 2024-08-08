@@ -38,7 +38,7 @@ Follow these steps to install the add-on:
 After installation, you need to configure the add-on. Here are the available options:
 
 ```yaml
-mqtt_host: core-mosquitto
+mqtt_host: 192.168.160.55
 mqtt_port: 1883
 mqtt_username: ""
 mqtt_password: ""
