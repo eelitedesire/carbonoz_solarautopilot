@@ -321,15 +321,15 @@ async function getCurrentValue(topic) {
         WHERE "topic" = '${topic}'
         AND time >= now() - 2d
         GROUP BY time(1d) tz('Indian/Mauritius')
-    `
+    `;
   try {
-    return await influx.query(query)
+    return await influx.query(query);
   } catch (error) {
     console.error(
       `Error querying InfluxDB for topic ${topic}:`,
       error.toString()
-    )
-    throw error
+    );
+    throw error;
   }
 }
 
@@ -375,16 +375,17 @@ async function queryInfluxDB(topic) {
 function calculateDailyDifference(data) {
   return data.map((current, index, array) => {
     if (index === 0 || !array[index - 1].value) {
-      return { ...current, value: 0 }
+      return { ...current, value: 0 };
     } else {
-      const previousData = array[index - 1].value
-      const currentData = current.value
+      const previousData = array[index - 1].value;
+      const currentData = current.value;
       return currentData >= previousData
         ? { ...current, value: currentData - previousData }
-        : { ...current }
+        : { ...current, value: currentData };
     }
-  })
+  });
 }
+
 
 // Route handlers
 
