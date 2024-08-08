@@ -947,6 +947,23 @@ const io = socketIO(IOserver, {
 //socket on connection
 io.on('connection', (socket) => {
   console.log('connection ok')
+  
+})
+
+// WebSocket setup
+
+const server = IOserver.listen(port, '0.0.0.0', async () => {
+  console.log(`Server is running on http://0.0.0.0:${port}`)
+  connectToMqtt()
+  connectDatabase()
+    .then(() => console.log('Database connected'))
+    .catch((err) => console.log({ err }))
+})
+
+const wss = new WebSocket.Server({ server })
+
+wss.on('connection', (ws) => {
+  console.log('Client connected')
   try {
     const getRealTimeData = async () => {
     const loadPowerData = await getCurrentValue(
@@ -1022,22 +1039,6 @@ io.on('connection', (socket) => {
   } catch (error) {
     console.error('Error processing MQTT message:', error)
   }
-})
-
-// WebSocket setup
-
-const server = IOserver.listen(port, '0.0.0.0', async () => {
-  console.log(`Server is running on http://0.0.0.0:${port}`)
-  connectToMqtt()
-  connectDatabase()
-    .then(() => console.log('Database connected'))
-    .catch((err) => console.log({ err }))
-})
-
-const wss = new WebSocket.Server({ server })
-
-wss.on('connection', (ws) => {
-  console.log('Client connected')
   ws.on('close', () => console.log('Client disconnected'))
 })
 
