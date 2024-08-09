@@ -35,12 +35,14 @@ const options = JSON.parse(fs.readFileSync('/data/options.json', 'utf8'))
 
 // InfluxDB configuration
 const influxConfig = {
-  host: options.mqtt_host,
-  port: 8086,
-  database: options.database_name,
-  username: options.database_username,
-  password: options.database_password,
-}
+    host: options.mqtt_host,
+    port: 8086,
+    database: options.database_name,
+    username: options.database_username,
+    password: options.database_password,
+    protocol: 'http',
+    timeout: 10000
+};
 const influx = new Influx.InfluxDB(influxConfig)
 
 // MQTT configuration
@@ -171,11 +173,6 @@ function updateSystemState(topic, message) {
 }
 
 // Save MQTT message to InfluxDB
-let messageBuffer = [];
-let isProcessing = false;
-const MAX_BUFFER_SIZE = 1000; // Adjust based on your needs
-const FLUSH_INTERVAL = 5000; // 5 seconds
-
 async function saveMessageToInfluxDB(topic, message) {
     try {
         const parsedMessage = parseFloat(message.toString());
@@ -185,7 +182,7 @@ async function saveMessageToInfluxDB(topic, message) {
             return;
         }
 
-        const timestamp = moment().tz('Indian/Mauritius').valueOf() * 1000000; // nanosecond precision
+        const timestamp = new Date().getTime() * 1000000; // nanosecond precision
 
         const point = {
             measurement: 'state',
@@ -197,52 +194,18 @@ async function saveMessageToInfluxDB(topic, message) {
             timestamp: timestamp
         };
 
-        messageBuffer.push(point);
+        console.log(`Attempting to write point to InfluxDB - Topic: ${topic}, Value: ${parsedMessage}, Raw: ${message.toString()}`);
 
-        if (messageBuffer.length >= MAX_BUFFER_SIZE) {
-            await flushBuffer();
-        }
+        await influx.writePoints([point]);
+        console.log(`Successfully wrote point to InfluxDB - Topic: ${topic}, Value: ${parsedMessage}`);
+
+        // Immediately verify the saved value
+        await verifySavedValue(topic, parsedMessage.toString());
     } catch (err) {
-        console.error('Error preparing message for InfluxDB:', err);
+        console.error('Error saving message to InfluxDB:', err);
     }
 }
 
-async function flushBuffer() {
-    if (isProcessing || messageBuffer.length === 0) return;
-
-    isProcessing = true;
-    const currentBuffer = [...messageBuffer];
-    messageBuffer = [];
-
-    try {
-        await retry(async () => {
-            await influx.writePoints(currentBuffer, {
-                precision: 'n' // nanosecond precision
-            });
-        }, {
-            retries: 5,
-            factor: 2,
-            minTimeout: 1000,
-            maxTimeout: 60000,
-            onRetry: (error) => {
-                console.warn('Retrying InfluxDB write due to error:', error);
-            }
-        });
-
-        console.log(`Successfully wrote ${currentBuffer.length} points to InfluxDB`);
-
-        // Verify saved values
-        for (const point of currentBuffer) {
-            await verifySavedValue(point.tags.topic, point.fields.value.toString());
-        }
-    } catch (error) {
-        console.error('Error writing to InfluxDB:', error);
-        // On error, add points back to the buffer
-        messageBuffer.unshift(...currentBuffer);
-    } finally {
-        isProcessing = false;
-    }
-}
 
 async function verifySavedValue(topic, expectedValue) {
     try {
@@ -250,6 +213,8 @@ async function verifySavedValue(topic, expectedValue) {
             SELECT last("value"), last("raw_value")
             FROM "state"
             WHERE "topic" = '${topic}'
+            ORDER BY time DESC
+            LIMIT 1
         `;
         const result = await influx.query(query);
         
@@ -257,61 +222,62 @@ async function verifySavedValue(topic, expectedValue) {
             const savedValue = result[0].last.toString();
             const savedRawValue = result[0].last_raw_value;
             
+            console.log(`Verification - Topic: ${topic}`);
+            console.log(`  Expected: ${expectedValue}`);
+            console.log(`  Saved Value: ${savedValue}`);
+            console.log(`  Saved Raw Value: ${savedRawValue}`);
+            
             if (savedValue === expectedValue) {
-                console.log(`Verification successful - Topic: ${topic}, Value: ${savedValue}`);
+                console.log(`  Verification successful`);
             } else {
-                console.warn(`Verification failed - Topic: ${topic}, Expected: ${expectedValue}, Saved: ${savedValue}, Raw: ${savedRawValue}`);
+                console.warn(`  Verification failed`);
                 // Implement recovery logic here if needed
             }
         } else {
             console.log(`Verification - No data found for topic: ${topic}`);
         }
     } catch (error) {
-        console.error(`Error verifying saved value for topic ${topic}:`, error.toString());
-  try {
-    const parsedMessage = parseFloat(message.toString())
-
-    if (isNaN(parsedMessage)) {
-      return
+        console.error(`Error verifying saved value for topic ${topic}:`, error);
     }
-
-    const timestamp = new Date().getTime()
-    const dataPoint = {
-      measurement: 'state',
-      fields: { value: parsedMessage },
-      tags: { topic: topic },
-      timestamp: timestamp * 1000000,
-    }
-
-    await retry(
-      async () => {
-        await influx.writePoints([dataPoint])
-      },
-      {
-        retries: 5,
-        minTimeout: 1000,
-      }
-    )
-  } catch (err) {
-    console.error(
-      'Error saving message to InfluxDB:',
-      err.response ? err.response.body : err.message
-    )
-  }
-}
 }
 
-// Set up interval to periodically flush the buffer
-setInterval(flushBuffer, FLUSH_INTERVAL);
 
-// Graceful shutdown
-process.on('SIGINT', async () => {
-    console.log('Shutting down...');
-    await flushBuffer();
-    process.exit(0);
-});
+async function checkLatestValues() {
+    const topics = [
+        'solar_assistant_DEYE/total/battery_energy_in/state',
+        'solar_assistant_DEYE/total/battery_energy_out/state',
+        'solar_assistant_DEYE/total/grid_energy_in/state',
+        'solar_assistant_DEYE/total/grid_energy_out/state',
+        'solar_assistant_DEYE/total/load_energy/state',
+        'solar_assistant_DEYE/total/pv_energy/state'
+    ];
 
-module.exports = saveMessageToInfluxDB;
+    for (const topic of topics) {
+        try {
+            const query = `
+                SELECT last("value"), last("raw_value")
+                FROM "state"
+                WHERE "topic" = '${topic}'
+                ORDER BY time DESC
+                LIMIT 1
+            `;
+            const result = await influx.query(query);
+            
+            if (result && result.length > 0) {
+                console.log(`Latest value for ${topic}:`);
+                console.log(`  Value: ${result[0].last}`);
+                console.log(`  Raw Value: ${result[0].last_raw_value}`);
+            } else {
+                console.log(`No data found for topic: ${topic}`);
+            }
+        } catch (error) {
+            console.error(`Error checking latest value for topic ${topic}:`, error);
+        }
+    }
+}
+
+// Run this check every 5 minutes
+setInterval(checkLatestValues, 5 * 60 * 1000);
 
 // Fetch current value from InfluxDB
 async function getCurrentValue(topic) {
