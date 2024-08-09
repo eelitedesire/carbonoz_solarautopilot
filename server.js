@@ -240,6 +240,43 @@ async function verifySavedValue(topic, expectedValue) {
     }
 }
 
+async function checkLatestValues() {
+    const topics = [
+        'solar_assistant_DEYE/total/battery_energy_in/state',
+        'solar_assistant_DEYE/total/battery_energy_out/state',
+        'solar_assistant_DEYE/total/grid_energy_in/state',
+        'solar_assistant_DEYE/total/grid_energy_out/state',
+        'solar_assistant_DEYE/total/load_energy/state',
+        'solar_assistant_DEYE/total/pv_energy/state'
+    ];
+
+    for (const topic of topics) {
+        try {
+            const query = `
+                SELECT last("value"), last("raw_value")
+                FROM "state"
+                WHERE "topic" = '${topic}'
+                ORDER BY time DESC
+                LIMIT 1
+            `;
+            const result = await influx.query(query);
+            
+            if (result && result.length > 0) {
+                console.log(`Latest value for ${topic}:`);
+                console.log(`  Value: ${result[0].last}`);
+                console.log(`  Raw Value: ${result[0].last_raw_value}`);
+            } else {
+                console.log(`No data found for topic: ${topic}`);
+            }
+        } catch (error) {
+            console.error(`Error checking latest value for topic ${topic}:`, error);
+        }
+    }
+}
+
+// Run this check every 5 minutes
+setInterval(checkLatestValues, 5 * 60 * 1000);
+
 // Fetch current value from InfluxDB
 async function getCurrentValue(topic) {
   const query = `
