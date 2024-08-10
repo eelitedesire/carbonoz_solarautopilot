@@ -192,13 +192,8 @@ async function saveMessageToInfluxDB(topic, message) {
             timestamp: new Date().getTime() * 1000000 // nanosecond precision
         };
 
-        console.log(`Attempting to write point to InfluxDB - Topic: ${topic}, Value: ${parsedMessage}, Raw: ${message.toString()}`);
-
         await influx.writePoints([point]);
-        console.log(`Successfully wrote point to InfluxDB - Topic: ${topic}, Value: ${parsedMessage}`);
 
-        // Immediately verify the saved value
-        await verifySavedValue(topic, parsedMessage.toString());
     } catch (err) {
         console.error('Error saving message to InfluxDB:', err);
     }
