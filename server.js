@@ -205,9 +205,6 @@ async function saveMessageToInfluxDB(topic, message) {
 }
 
 
-// Run this check every 5 minutes
-setInterval(checkLatestValues, 5 * 60 * 1000);
-
 // Fetch current value from InfluxDB
 async function getCurrentValue(topic) {
   const query = `
