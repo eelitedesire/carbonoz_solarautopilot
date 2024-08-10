@@ -178,7 +178,6 @@ async function saveMessageToInfluxDB(topic, message) {
         const parsedMessage = parseFloat(message.toString());
         
         if (isNaN(parsedMessage)) {
-            console.warn(`Invalid numeric value received for topic ${topic}: ${message}`);
             return;
         }
 
@@ -203,10 +202,10 @@ async function saveMessageToInfluxDB(topic, message) {
 // Fetch current value from InfluxDB
 async function getCurrentValue(topic) {
   const query = `
-        SELECT mean("value") AS "value"
+        SELECT last("value") AS "value"
         FROM "state"
         WHERE "topic" = '${topic}'
-        AND time >= now() - 1d
+        AND time >= now() - 2d
         GROUP BY time(1d) tz('Indian/Mauritius')
     `
   try {
@@ -241,7 +240,7 @@ async function getCurrentData(topic) {
 // Fetch analytics data from InfluxDB
 async function queryInfluxDB(topic) {
   const query = `
-        SELECT mean("value") AS "value"
+        SELECT last("value") AS "value"
         FROM "state"
         WHERE "topic" = '${topic}'
         AND time >= now() - 30d
