@@ -182,8 +182,6 @@ async function saveMessageToInfluxDB(topic, message) {
             return;
         }
 
-        const timestamp = new Date().getTime() * 1000000; // nanosecond precision
-
         const point = {
             measurement: 'state',
             tags: { topic: topic },
@@ -191,7 +189,7 @@ async function saveMessageToInfluxDB(topic, message) {
                 value: parsedMessage,
                 raw_value: message.toString()
             },
-            timestamp: timestamp
+            timestamp: new Date().getTime() * 1000000 // nanosecond precision
         };
 
         console.log(`Attempting to write point to InfluxDB - Topic: ${topic}, Value: ${parsedMessage}, Raw: ${message.toString()}`);
@@ -206,73 +204,6 @@ async function saveMessageToInfluxDB(topic, message) {
     }
 }
 
-async function verifySavedValue(topic, expectedValue) {
-    try {
-        const query = `
-            SELECT last("value"), last("raw_value")
-            FROM "state"
-            WHERE "topic" = '${topic}'
-            ORDER BY time DESC
-            LIMIT 1
-        `;
-        const result = await influx.query(query);
-        
-        if (result && result.length > 0) {
-            const savedValue = result[0].last.toString();
-            const savedRawValue = result[0].last_raw_value;
-            
-            console.log(`Verification - Topic: ${topic}`);
-            console.log(`  Expected: ${expectedValue}`);
-            console.log(`  Saved Value: ${savedValue}`);
-            console.log(`  Saved Raw Value: ${savedRawValue}`);
-            
-            if (savedValue === expectedValue) {
-                console.log(`  Verification successful`);
-            } else {
-                console.warn(`  Verification failed`);
-                // Implement recovery logic here if needed
-            }
-        } else {
-            console.log(`Verification - No data found for topic: ${topic}`);
-        }
-    } catch (error) {
-        console.error(`Error verifying saved value for topic ${topic}:`, error);
-    }
-}
-
-async function checkLatestValues() {
-    const topics = [
-        'solar_assistant_DEYE/total/battery_energy_in/state',
-        'solar_assistant_DEYE/total/battery_energy_out/state',
-        'solar_assistant_DEYE/total/grid_energy_in/state',
-        'solar_assistant_DEYE/total/grid_energy_out/state',
-        'solar_assistant_DEYE/total/load_energy/state',
-        'solar_assistant_DEYE/total/pv_energy/state'
-    ];
-
-    for (const topic of topics) {
-        try {
-            const query = `
-                SELECT last("value"), last("raw_value")
-                FROM "state"
-                WHERE "topic" = '${topic}'
-                ORDER BY time DESC
-                LIMIT 1
-            `;
-            const result = await influx.query(query);
-            
-            if (result && result.length > 0) {
-                console.log(`Latest value for ${topic}:`);
-                console.log(`  Value: ${result[0].last}`);
-                console.log(`  Raw Value: ${result[0].last_raw_value}`);
-            } else {
-                console.log(`No data found for topic: ${topic}`);
-            }
-        } catch (error) {
-            console.error(`Error checking latest value for topic ${topic}:`, error);
-        }
-    }
-}
 
 // Run this check every 5 minutes
 setInterval(checkLatestValues, 5 * 60 * 1000);
