@@ -267,62 +267,55 @@ footer {
     100% { transform: rotate(360deg); }
   }
 
+  .card {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
 
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -10px;
+}
 
- 
+.col {
+    flex: 1;
+    padding: 10px;
+    min-width: 250px;
+}
 
+.chart-container {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
 
-  
-  
-      .card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
 
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            margin: -10px;
-        }
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
 
-        .col {
-            flex: 1;
-            padding: 10px;
-            min-width: 250px;
-        }
-
-        .chart-container {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: var(--primary-color);
-            color: var(--text-color);
-            text-decoration: none;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-        .logo-text {
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+.logo-text {
     color: #000000; /* Black color for 'Carbonoz' */
     font-weight: bold;
 }
@@ -379,7 +372,7 @@ footer {
                             <div class="card">
                                 <h4>Today</h4>
                                 <p>
-                                    <img src="https://www.svgrepo.com/download/293503/solar-panel.svg" alt="Solar Panel" width="50"/>
+                                    <img src="https://eridirect.com/wp-content/uploads/2021/02/bigstock-Solar-panel-against-blue-sky-16564781.jpg" alt="Solar Panel" width="50"/>
                                     <span>Solar PV: </span>
                                     <span id="daily-solar-pv-total">Calculating...</span>
                                 </p>
@@ -389,7 +382,7 @@ footer {
                             <div class="card">
                                 <h4>Last 7 days</h4>
                                 <p>
-                                    <img src="https://www.svgrepo.com/download/293503/solar-panel.svg" alt="Solar Panel" width="50"/>
+                                    <img src="https://eridirect.com/wp-content/uploads/2021/02/bigstock-Solar-panel-against-blue-sky-16564781.jpg" alt="Solar Panel" width="50"/>
                                     <span>Solar PV: </span>
                                     <span id="weekly-solar-pv-total">Calculating...</span>
                                 </p>
@@ -399,7 +392,7 @@ footer {
                             <div class="card">
                                 <h4>Last 30 days</h4>
                                 <p>
-                                    <img src="https://www.svgrepo.com/download/293503/solar-panel.svg" alt="Solar Panel" width="50"/>
+                                    <img src="https://eridirect.com/wp-content/uploads/2021/02/bigstock-Solar-panel-against-blue-sky-16564781.jpg" alt="Solar Panel" width="50"/>
                                     <span>Solar PV: </span>
                                     <span id="monthly-solar-pv-total">Calculating...</span>
                                 </p>
@@ -538,84 +531,111 @@ footer {
                         </div>
                         <a href="#" id="last12months-table-download" class="btn">Download CSV</a>
                     </div>
+
+                    <!-- New section for yearly data -->
+                    <div class="chart-container">
+                        <h3>Yearly Data</h3>
+                        <canvas id="yearly-chart"></canvas>
+                    </div>
+
+                    <div class="card">
+                        <h3>Yearly Data</h3>
+                        <div class="table-container">
+                            <table id="yearly-table">
+                                <thead>
+                                    <tr>
+                                        <th>Year</th>
+                                        <th>Solar PV</th>
+                                        <th>Load</th>
+                                        <th>Battery Charged</th>
+                                        <th>Battery Discharged</th>
+                                        <th>Grid Used</th>
+                                        <th>Grid Exported</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% 
+                                    let yearlyData = {};
+                                    let currentYear = new Date().getFullYear();
+                                    let startYear = Math.max(currentYear - 9, 2024); // Start from 2024 or 10 years ago, whichever is later
+
+                                    // Initialize the years
+                                    for (let year = startYear; year <= currentYear; year++) {
+                                        yearlyData[year] = {
+                                            load: 0, solar: 0, batteryCharged: 0, 
+                                            batteryDischarged: 0, gridUsed: 0, gridExported: 0
+                                        };
+                                    }
+
+                                    // Sum up the data for each year
+                                    for (let i = data.loadPowerData.length - 1; i >= 1; i--) {
+                                        let date = new Date(data.loadPowerData[i].time);
+                                        let year = date.getFullYear();
+                                        
+                                        if (yearlyData[year]) {
+                                            let loadPowerDiff, pvPowerDiff, batteryStateOfChargeDiff, batteryPowerDiff, gridPowerDiff, netPVPowerDiff;
+                                            
+                                            if (data.loadPowerData[i-1].value === null || data.loadPowerData[i-1].value === 0) {
+                                                loadPowerDiff = 0;
+                                                pvPowerDiff = 0;
+                                                batteryStateOfChargeDiff = 0;
+                                                batteryPowerDiff = 0;
+                                                gridPowerDiff = 0;
+                                                netPVPowerDiff = 0;
+                                            } else {
+                                                loadPowerDiff = data.loadPowerData[i].value >= data.loadPowerData[i-1].value ? 
+                                                    (data.loadPowerData[i].value - data.loadPowerData[i-1].value) : data.loadPowerData[i].value;
+                                                pvPowerDiff = data.pvPowerData[i].value >= data.pvPowerData[i-1].value ? 
+                                                    (data.pvPowerData[i].value - data.pvPowerData[i-1].value) : data.pvPowerData[i].value;
+                                                batteryStateOfChargeDiff = data.batteryStateOfChargeData[i].value >= data.batteryStateOfChargeData[i-1].value ? 
+                                                    (data.batteryStateOfChargeData[i].value - data.batteryStateOfChargeData[i-1].value) : data.batteryStateOfChargeData[i].value;
+                                                batteryPowerDiff = data.batteryPowerData[i].value >= data.batteryPowerData[i-1].value ? 
+                                                    (data.batteryPowerData[i].value - data.batteryPowerData[i-1].value) : data.batteryPowerData[i].value;
+                                                gridPowerDiff = data.gridPowerData[i].value >= data.gridPowerData[i-1].value ? 
+                                                    (data.gridPowerData[i].value - data.gridPowerData[i-1].value) : data.gridPowerData[i].value;
+                                                netPVPowerDiff = data.gridVoltageData[i].value >= data.gridVoltageData[i-1].value ? 
+                                                    (data.gridVoltageData[i].value - data.gridVoltageData[i-1].value) : data.gridVoltageData[i].value;
+                                            }
+
+                                            yearlyData[year].load += loadPowerDiff;
+                                            yearlyData[year].solar += pvPowerDiff;
+                                            yearlyData[year].batteryCharged += batteryStateOfChargeDiff;
+                                            yearlyData[year].batteryDischarged += batteryPowerDiff;
+                                            yearlyData[year].gridUsed += gridPowerDiff;
+                                            yearlyData[year].gridExported += netPVPowerDiff;
+                                        }
+                                    }
+
+                                    // Display the data for each year
+                                    Object.keys(yearlyData).sort((a, b) => b - a).forEach(year => {
+                                        let data = yearlyData[year];
+                                    %>
+                                        <tr>
+                                            <td><%= year %></td>
+                                            <td><%= data.solar.toFixed(1) %> kWh</td>
+                                            <td><%= data.load.toFixed(1) %> kWh</td>
+                                            <td><%= data.batteryCharged.toFixed(1) %> kWh</td>
+                                            <td><%= data.batteryDischarged.toFixed(1) %> kWh</td>
+                                            <td><%= data.gridUsed.toFixed(1) %> kWh</td>
+                                            <td><%= data.gridExported.toFixed(1) %> kWh</td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                        <a href="#" id="yearly-table-download" class="btn">Download CSV</a>
+                    </div>
                 </div>
             </div>
-            <div class="chart-container">
-                <h3>Yearly Data (Up to 10 Years)</h3>
-                <canvas id="yearly-chart"></canvas>
-            </div>
-            
-            <div class="card">
-                <h3>Yearly Data</h3>
-                <div class="table-container">
-                    <table id="yearly-table">
-                        <thead>
-                            <tr>
-                                <th>Year</th>
-                                <th>Solar PV</th>
-                                <th>Load</th>
-                                <th>Battery Charged</th>
-                                <th>Battery Discharged</th>
-                                <th>Grid Used</th>
-                                <th>Grid Exported</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% 
-                            let yearlyData = {};
-                            let currentYear = new Date().getFullYear();
-                            
-                            // Initialize the last 10 years
-                            for (let i = 0; i < 10; i++) {
-                                let year = currentYear - i;
-                                yearlyData[year] = {
-                                    load: 0, solar: 0, batteryCharged: 0, 
-                                    batteryDischarged: 0, gridUsed: 0, gridExported: 0
-                                };
-                            }
-                
-                            // Sum up the data for each year
-                            Object.entries(monthlyData).forEach(([monthYear, data]) => {
-                                let year = parseInt(monthYear.split(' ')[1]);
-                                if (yearlyData[year]) {
-                                    yearlyData[year].load += data.load;
-                                    yearlyData[year].solar += data.solar;
-                                    yearlyData[year].batteryCharged += data.batteryCharged;
-                                    yearlyData[year].batteryDischarged += data.batteryDischarged;
-                                    yearlyData[year].gridUsed += data.gridUsed;
-                                    yearlyData[year].gridExported += data.gridExported;
-                                }
-                            });
-                
-                            // Display the data for each year
-                            Object.keys(yearlyData).sort((a, b) => b - a).forEach(year => {
-                                let data = yearlyData[year];
-                                if (data.load > 0 || data.solar > 0 || data.batteryCharged > 0 || 
-                                    data.batteryDischarged > 0 || data.gridUsed > 0 || data.gridExported > 0) {
-                            %>
-                                <tr>
-                                    <td><%= year %></td>
-                                    <td><%= data.solar.toFixed(1) %> kWh</td>
-                                    <td><%= data.load.toFixed(1) %> kWh</td>
-                                    <td><%= data.batteryCharged.toFixed(1) %> kWh</td>
-                                    <td><%= data.batteryDischarged.toFixed(1) %> kWh</td>
-                                    <td><%= data.gridUsed.toFixed(1) %> kWh</td>
-                                    <td><%= data.gridExported.toFixed(1) %> kWh</td>
-                                </tr>
-                            <% }}); %>
-                        </tbody>
-                    </table>
-                </div>
-                <a href="#" id="yearly-table-download" class="btn">Download CSV</a>
-            </div>
+
             <footer>
                 <p>&copy; 2024 Carbonoz SolarAutopilot. All rights reserved.</p>
             </footer>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
+    <script>
+      
     document.addEventListener('DOMContentLoaded', () => {
     // Function to get data from table
     function getTableData(tableId) {
@@ -754,6 +774,8 @@ footer {
     loadingOverlay.style.display = 'none';
 });
 </script>
+ 
 
 </body>
 </html>
+ 
