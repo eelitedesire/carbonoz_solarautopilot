@@ -829,7 +829,11 @@ io.on('connection', (socket) => {
 
 // WebSocket setup
 
-const server = IOserver.listen(port, '0.0.0.0', async () => {
+IOserver.listen(port,'0.0.0.0',()=>{
+  console.log(`Socket server is running on http://0.0.0.0:${port}`)
+})
+
+const server = app.listen(port, '0.0.0.0', async () => {
   console.log(`Server is running on http://0.0.0.0:${port}`)
   connectToMqtt()
   connectDatabase()
