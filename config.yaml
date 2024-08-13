@@ -19,6 +19,7 @@ hassio_api: true
 homeassistant_api: true
 ports:
   3000/tcp: 3000
+  6789/tcp: 6789
 options:
   mqtt_host: ""
   mqtt_port: 1883
