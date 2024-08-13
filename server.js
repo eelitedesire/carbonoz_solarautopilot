@@ -261,15 +261,47 @@ async function queryInfluxDB(topic) {
 function calculateDailyDifference(data) {
   return data.map((current, index, array) => {
     if (index === 0 || !array[index - 1].value) {
-      return { ...current, value: 0 }
+      return { ...current, difference: 0 };
     } else {
-      const previousData = array[index - 1].value
-      const currentData = current.value
-      return currentData >= previousData
-        ? { ...current, value: currentData - previousData }
-        : { ...current }
+      const previousData = array[index - 1].value;
+      const currentData = current.value;
+      const difference = currentData >= previousData ? currentData - previousData : currentData;
+      return { ...current, difference: parseFloat(difference.toFixed(1)) };
     }
-  })
+  });
+}
+
+function calculateLastTwoDaysDifference(data) {
+  const dataLength = data.length;
+
+  if (dataLength < 2) {
+    // If there's not enough data, return 0
+    return [{
+      time: new Date(),
+      difference: 0,
+    }];
+  }
+
+  const latestDay = data[dataLength - 1];
+  const previousDay = data[dataLength - 2];
+
+  let difference;
+  
+  if (!previousDay.value) {
+    // If no data for the previous day, display zero
+    difference = 0;
+  } else if (latestDay.value <= previousDay.value) {
+    // If current day's data is less than or equal to previous day's data, display it as is
+    difference = latestDay.value;
+  } else {
+    // If current day's data is greater, calculate the difference
+    difference = latestDay.value - previousDay.value;
+  }
+
+  return [{
+    time: latestDay.time,
+    difference: parseFloat(difference.toFixed(1)),
+  }];
 }
 
 // Route handlers
@@ -295,202 +327,102 @@ app.get('/chart', (req, res) => {
   })
 })
 
+
 app.get('/dashboard', async (req, res) => {
   try {
-    const loadPowerData = await getCurrentValue(
-      'solar_assistant_DEYE/total/load_energy/state'
-    )
-    const pvPowerData = await getCurrentValue(
-      'solar_assistant_DEYE/total/pv_energy/state'
-    )
-    const batteryPowerInData = await getCurrentValue(
-      'solar_assistant_DEYE/total/battery_energy_in/state'
-    )
-    const batteryPowerOutData = await getCurrentValue(
-      'solar_assistant_DEYE/total/battery_energy_out/state'
-    )
-    const gridPowerInData = await getCurrentValue(
-      'solar_assistant_DEYE/total/grid_energy_in/state'
-    )
-    const gridPowerOutData = await getCurrentValue(
-      'solar_assistant_DEYE/total/grid_energy_out/state'
-    )
+    const loadPowerData = await getCurrentValue('solar_assistant_DEYE/total/load_energy/state');
+    const pvPowerData = await getCurrentValue('solar_assistant_DEYE/total/pv_energy/state');
+    const batteryPowerInData = await getCurrentValue('solar_assistant_DEYE/total/battery_energy_in/state');
+    const batteryPowerOutData = await getCurrentValue('solar_assistant_DEYE/total/battery_energy_out/state');
+    const gridPowerInData = await getCurrentValue('solar_assistant_DEYE/total/grid_energy_in/state');
+    const gridPowerOutData = await getCurrentValue('solar_assistant_DEYE/total/grid_energy_out/state');
 
-    const loadPowerDataDaily = calculateDailyDifference(loadPowerData)
-    const pvPowerDataDaily = calculateDailyDifference(pvPowerData)
-    const batteryPowerInDataDaily = calculateDailyDifference(batteryPowerInData)
-    const batteryPowerOutDataDaily =
-      calculateDailyDifference(batteryPowerOutData)
-    const gridPowerInDataDaily = calculateDailyDifference(gridPowerInData)
-    const gridPowerOutDataDaily = calculateDailyDifference(gridPowerOutData)
-
-    const hourlyData = loadPowerDataDaily.map((load, index) => ({
-      hour: moment(load.time).format('HH'),
-      load: load.value || 0,
-      solar: (pvPowerDataDaily[index] && pvPowerDataDaily[index].value) || 0,
-      battery:
-        (batteryPowerOutDataDaily[index] &&
-          batteryPowerOutDataDaily[index].value) ||
-        0,
-      grid:
-        (gridPowerInDataDaily[index] && gridPowerInDataDaily[index].value) || 0,
-    }))
+    const loadPowerDataDaily = calculateLastTwoDaysDifference(loadPowerData);
+    const pvPowerDataDaily = calculateLastTwoDaysDifference(pvPowerData);
+    const batteryPowerInDataDaily = calculateLastTwoDaysDifference(batteryPowerInData);
+    const batteryPowerOutDataDaily = calculateLastTwoDaysDifference(batteryPowerOutData);
+    const gridPowerInDataDaily = calculateLastTwoDaysDifference(gridPowerInData);
+    const gridPowerOutDataDaily = calculateLastTwoDaysDifference(gridPowerOutData);
 
     const data = {
-      totalConsumption: loadPowerDataDaily.reduce(
-        (acc, load) => acc + (load.value || 0),
-        0
-      ),
-      solarProduction: pvPowerDataDaily.reduce(
-        (acc, pv) => acc + (pv.value || 0),
-        0
-      ),
-      gridIn: gridPowerInDataDaily.reduce(
-        (acc, grid) => acc + Math.max(grid.value || 0, 0),
-        0
-      ),
-      gridOut: gridPowerOutDataDaily.reduce(
-        (acc, grid) => acc + Math.min(grid.value || 0, 0),
-        0
-      ),
-      batteryCharged: batteryPowerInDataDaily.reduce(
-        (acc, battery) => acc + Math.max(battery.value || 0, 0),
-        0
-      ),
-      batteryDischarged: batteryPowerOutDataDaily.reduce(
-        (acc, battery) => acc + Math.min(battery.value || 0, 0),
-        0
-      ),
-      hourlyData,
-    }
+      loadDifference: loadPowerDataDaily[0].difference,
+      solarDifference: pvPowerDataDaily[0].difference,
+      batteryChargeDifference: batteryPowerInDataDaily[0].difference,
+      batteryDischargeDifference: batteryPowerOutDataDaily[0].difference,
+      gridInDifference: gridPowerInDataDaily[0].difference,
+      gridOutDifference: gridPowerOutDataDaily[0].difference,
+    };
 
     res.render('dashboard', {
       data,
       ingress_path: process.env.INGRESS_PATH || '',
-    })
+    });
   } catch (error) {
-    console.error('Error fetching data for dashboard:', error)
-    res.status(500).json({ error: 'Error fetching data for dashboard' })
+    console.error('Error fetching data for dashboard:', error);
+    res.status(500).json({ error: 'Error fetching data for dashboard' });
   }
-})
+});
 
 app.get('/api/energy', async (req, res) => {
   try {
-    const loadPowerData = await getCurrentValue(
-      'solar_assistant_DEYE/total/load_energy/state'
-    )
-    const pvPowerData = await getCurrentValue(
-      'solar_assistant_DEYE/total/pv_energy/state'
-    )
-    const batteryPowerInData = await getCurrentValue(
-      'solar_assistant_DEYE/total/battery_energy_in/state'
-    )
-    const batteryPowerOutData = await getCurrentValue(
-      'solar_assistant_DEYE/total/battery_energy_out/state'
-    )
-    const gridPowerInData = await getCurrentValue(
-      'solar_assistant_DEYE/total/grid_energy_in/state'
-    )
-    const gridPowerOutData = await getCurrentValue(
-      'solar_assistant_DEYE/total/grid_energy_out/state'
-    )
+    const loadPowerData = await getCurrentValue('solar_assistant_DEYE/total/load_energy/state');
+    const pvPowerData = await getCurrentValue('solar_assistant_DEYE/total/pv_energy/state');
+    const batteryPowerInData = await getCurrentValue('solar_assistant_DEYE/total/battery_energy_in/state');
+    const batteryPowerOutData = await getCurrentValue('solar_assistant_DEYE/total/battery_energy_out/state');
+    const gridPowerInData = await getCurrentValue('solar_assistant_DEYE/total/grid_energy_in/state');
+    const gridPowerOutData = await getCurrentValue('solar_assistant_DEYE/total/grid_energy_out/state');
 
-    const loadPowerDataDaily = calculateDailyDifference(loadPowerData)
-    const pvPowerDataDaily = calculateDailyDifference(pvPowerData)
-    const batteryPowerInDataDaily = calculateDailyDifference(batteryPowerInData)
-    const batteryPowerOutDataDaily =
-      calculateDailyDifference(batteryPowerOutData)
-    const gridPowerInDataDaily = calculateDailyDifference(gridPowerInData)
-    const gridPowerOutDataDaily = calculateDailyDifference(gridPowerOutData)
-
-    const hourlyData = loadPowerDataDaily.map((load, index) => ({
-      hour: moment(load.time).format('HH'),
-      load: load.value || 0,
-      solar: (pvPowerDataDaily[index] && pvPowerDataDaily[index].value) || 0,
-      battery:
-        (batteryPowerOutDataDaily[index] &&
-          batteryPowerOutDataDaily[index].value) ||
-        0,
-      grid:
-        (gridPowerInDataDaily[index] && gridPowerInDataDaily[index].value) || 0,
-    }))
+    const loadPowerDataDaily = calculateLastTwoDaysDifference(loadPowerData);
+    const pvPowerDataDaily = calculateLastTwoDaysDifference(pvPowerData);
+    const batteryPowerInDataDaily = calculateLastTwoDaysDifference(batteryPowerInData);
+    const batteryPowerOutDataDaily = calculateLastTwoDaysDifference(batteryPowerOutData);
+    const gridPowerInDataDaily = calculateLastTwoDaysDifference(gridPowerInData);
+    const gridPowerOutDataDaily = calculateLastTwoDaysDifference(gridPowerOutData);
 
     const data = {
-      totalConsumption: loadPowerDataDaily.reduce(
-        (acc, load) => acc + (load.value || 0),
-        0
-      ),
-      solarProduction: pvPowerDataDaily.reduce(
-        (acc, pv) => acc + (pv.value || 0),
-        0
-      ),
-      gridIn: gridPowerInDataDaily.reduce(
-        (acc, grid) => acc + Math.max(grid.value || 0, 0),
-        0
-      ),
-      gridOut: gridPowerOutDataDaily.reduce(
-        (acc, grid) => acc + Math.min(grid.value || 0, 0),
-        0
-      ),
-      batteryCharged: batteryPowerInDataDaily.reduce(
-        (acc, battery) => acc + Math.max(battery.value || 0, 0),
-        0
-      ),
-      batteryDischarged: batteryPowerOutDataDaily.reduce(
-        (acc, battery) => acc + Math.min(battery.value || 0, 0),
-        0
-      ),
-      hourlyData,
-    }
+      loadDifference: loadPowerDataDaily[0].difference,
+      solarDifference: pvPowerDataDaily[0].difference,
+      batteryChargeDifference: batteryPowerInDataDaily[0].difference,
+      batteryDischargeDifference: batteryPowerOutDataDaily[0].difference,
+      gridInDifference: gridPowerInDataDaily[0].difference,
+      gridOutDifference: gridPowerOutDataDaily[0].difference,
+    };
 
-    res.json(data)
+    res.json(data);
   } catch (error) {
-    console.error('Error fetching energy data:', error)
-    res.status(500).json({ error: 'Error fetching energy data' })
+    console.error('Error fetching energy data:', error);
+    res.status(500).json({ error: 'Error fetching energy data' });
   }
-})
+});
+
 
 app.get('/analytics', async (req, res) => {
   try {
-    const loadPowerData = await queryInfluxDB(
-      'solar_assistant_DEYE/total/load_energy/state'
-    )
-    const pvPowerData = await queryInfluxDB(
-      'solar_assistant_DEYE/total/pv_energy/state'
-    )
-    const batteryStateOfChargeData = await queryInfluxDB(
-      'solar_assistant_DEYE/total/battery_energy_in/state'
-    )
-    const batteryPowerData = await queryInfluxDB(
-      'solar_assistant_DEYE/total/battery_energy_out/state'
-    )
-    const gridPowerData = await queryInfluxDB(
-      'solar_assistant_DEYE/total/grid_energy_in/state'
-    )
-    const gridVoltageData = await queryInfluxDB(
-      'solar_assistant_DEYE/total/grid_energy_out/state'
-    )
+    const loadPowerData = await queryInfluxDB('solar_assistant_DEYE/total/load_energy/state');
+    const pvPowerData = await queryInfluxDB('solar_assistant_DEYE/total/pv_energy/state');
+    const batteryStateOfChargeData = await queryInfluxDB('solar_assistant_DEYE/total/battery_energy_in/state');
+    const batteryPowerData = await queryInfluxDB('solar_assistant_DEYE/total/battery_energy_out/state');
+    const gridPowerData = await queryInfluxDB('solar_assistant_DEYE/total/grid_energy_in/state');
+    const gridVoltageData = await queryInfluxDB('solar_assistant_DEYE/total/grid_energy_out/state');
 
     const data = {
-      loadPowerData,
-      pvPowerData,
-      batteryStateOfChargeData,
-      batteryPowerData,
-      gridPowerData,
-      gridVoltageData,
-    }
+      loadPowerData: calculateDailyDifference(loadPowerData),
+      pvPowerData: calculateDailyDifference(pvPowerData),
+      batteryStateOfChargeData: calculateDailyDifference(batteryStateOfChargeData),
+      batteryPowerData: calculateDailyDifference(batteryPowerData),
+      gridPowerData: calculateDailyDifference(gridPowerData),
+      gridVoltageData: calculateDailyDifference(gridVoltageData),
+    };
 
     res.render('analytics', {
       data,
       ingress_path: process.env.INGRESS_PATH || '',
-    })
+    });
   } catch (error) {
-    console.error('Error fetching analytics data from InfluxDB:', error)
-    res
-      .status(500)
-      .json({ error: 'Error fetching analytics data from InfluxDB' })
+    console.error('Error fetching analytics data from InfluxDB:', error);
+    res.status(500).json({ error: 'Error fetching analytics data from InfluxDB' });
   }
-})
+});
 
 app.get('/', async (req, res) => {
   try {
