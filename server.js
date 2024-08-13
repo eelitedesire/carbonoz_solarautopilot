@@ -795,27 +795,12 @@ io.on('connection', (socket) => {
     const gridPowerOutDataDaily = calculateDailyDifference(gridPowerOutData)
 
     const data = {
-      load: loadPowerDataDaily.reduce(
-        (acc, load) => acc + (load.value || 0),
-        0
-      ),
-      pv: pvPowerDataDaily.reduce((acc, pv) => acc + (pv.value || 0), 0),
-      gridIn: gridPowerInDataDaily.reduce(
-        (acc, grid) => acc + Math.max(grid.value || 0, 0),
-        0
-      ),
-      gridOut: gridPowerOutDataDaily.reduce(
-        (acc, grid) => acc + Math.min(grid.value || 0, 0),
-        0
-      ),
-      batteryCharged: batteryPowerInDataDaily.reduce(
-        (acc, battery) => acc + Math.max(battery.value || 0, 0),
-        0
-      ),
-      batteryDischarged: batteryPowerOutDataDaily.reduce(
-        (acc, battery) => acc + Math.min(battery.value || 0, 0),
-        0
-      ),
+      load: loadPowerDataDaily,
+      pv: pvPowerDataDaily,
+      gridIn: gridPowerInDataDaily,
+      gridOut: gridPowerOutDataDaily,
+      batteryCharged: batteryPowerInDataDaily,
+      batteryDischarged: batteryPowerOutDataDaily
     }
 
     return data
