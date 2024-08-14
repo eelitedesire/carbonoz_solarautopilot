@@ -11,6 +11,7 @@ const retry = require('async-retry');
 
 const app = express();
 const port = process.env.PORT || 6789;
+const socketPort = 7100
 const { http } = require('follow-redirects')
 const cors = require('cors')
 const socketIO = require('socket.io')
@@ -829,8 +830,8 @@ io.on('connection', (socket) => {
 
 // WebSocket setup
 
-IOserver.listen(port,'0.0.0.0',()=>{
-  console.log(`Socket server is running on http://0.0.0.0:${port}`)
+IOserver.listen(socketPort,'0.0.0.0',()=>{
+  console.log(`Socket server is running on http://0.0.0.0:${socketPort}`)
 })
 
 const server = app.listen(port, '0.0.0.0', async () => {
