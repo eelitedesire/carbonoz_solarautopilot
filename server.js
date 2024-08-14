@@ -271,6 +271,22 @@ function calculateDailyDifference(data) {
     }
   });
 }
+
+function calculateDailyDifferenceForSockets(data) {
+  return data.map((current, index, array) => {
+    if (index === 0 || !array[index - 1].value) {
+      let difference = 0
+      return difference;
+    } else {
+      const previousData = array[index - 1].value;
+      const currentData = current.value;
+      const difference = currentData >= previousData ? currentData - previousData : currentData;
+      let newDifference = parseFloat(difference.toFixed(1));
+      return  newDifference
+    }
+  }).join('');
+}
+
 function calculateLastTwoDaysDifference(data) {
   const dataLength = data.length;
 
@@ -776,12 +792,12 @@ io.on('connection', (socket) => {
 
 
     const data = {
-      load: calculateDailyDifference(loadPowerData),
-      pv: calculateDailyDifference(pvPowerData),
-      gridIn:  calculateDailyDifference(gridPowerData),
-      gridOut: calculateDailyDifference(gridVoltageData),
-      batteryCharged: calculateDailyDifference(batteryStateOfChargeData),
-      batteryDischarged: calculateDailyDifference(batteryPowerData)
+      load: calculateDailyDifferenceForSockets(loadPowerData),
+      pv: calculateDailyDifferenceForSockets(pvPowerData),
+      gridIn:  calculateDailyDifferenceForSockets(gridPowerData),
+      gridOut: calculateDailyDifferenceForSockets(gridVoltageData),
+      batteryCharged: calculateDailyDifferenceForSockets(batteryStateOfChargeData),
+      batteryDischarged: calculateDailyDifferenceForSockets(batteryPowerData)
     }
 
     return data
