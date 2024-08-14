@@ -626,6 +626,16 @@ function getCategoryKeywords(category) {
       return ['load_power']
     case 'gridPower':
       return ['grid_power']
+    case 'pvPower':
+      return ['pv_power']
+    case 'battery1':
+      return ['battery_1']
+    case 'battery2':
+      return ['battery_2']
+    case 'battery3':
+      return ['battery_3']
+    case 'battery4':
+      return ['battery_4']
     default:
       return []
   }
