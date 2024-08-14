@@ -57,7 +57,7 @@ const mqttConfig = {
 // Connect to MQTT broker
 let mqttClient
 let incomingMessages = []
-const MAX_MESSAGES = 200
+const MAX_MESSAGES = 400
 
 function connectToMqtt() {
   mqttClient = mqtt.connect(`mqtt://${mqttConfig.host}:${mqttConfig.port}`, {
