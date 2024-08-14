@@ -271,7 +271,6 @@ function calculateDailyDifference(data) {
     }
   });
 }
-
 function calculateLastTwoDaysDifference(data) {
   const dataLength = data.length;
 
@@ -768,40 +767,21 @@ io.on('connection', (socket) => {
   console.log('connection ok')
   try {
     const getRealTimeData = async () => {
-    const loadPowerData = await getCurrentValue(
-      'solar_assistant_DEYE/total/load_energy/state'
-    )
-    const pvPowerData = await getCurrentValue(
-      'solar_assistant_DEYE/total/pv_energy/state'
-    )
-    const batteryPowerInData = await getCurrentValue(
-      'solar_assistant_DEYE/total/battery_energy_in/state'
-    )
-    const batteryPowerOutData = await getCurrentValue(
-      'solar_assistant_DEYE/total/battery_energy_out/state'
-    )
-    const gridPowerInData = await getCurrentValue(
-      'solar_assistant_DEYE/total/grid_energy_in/state'
-    )
-    const gridPowerOutData = await getCurrentValue(
-      'solar_assistant_DEYE/total/grid_energy_out/state'
-    )
+    const loadPowerData = await queryInfluxDB('solar_assistant_DEYE/total/load_energy/state');
+    const pvPowerData = await queryInfluxDB('solar_assistant_DEYE/total/pv_energy/state');
+    const batteryStateOfChargeData = await queryInfluxDB('solar_assistant_DEYE/total/battery_energy_in/state');
+    const batteryPowerData = await queryInfluxDB('solar_assistant_DEYE/total/battery_energy_out/state');
+    const gridPowerData = await queryInfluxDB('solar_assistant_DEYE/total/grid_energy_in/state');
+    const gridVoltageData = await queryInfluxDB('solar_assistant_DEYE/total/grid_energy_out/state');
 
-    const loadPowerDataDaily = calculateDailyDifference(loadPowerData)
-    const pvPowerDataDaily = calculateDailyDifference(pvPowerData)
-    const batteryPowerInDataDaily = calculateDailyDifference(batteryPowerInData)
-    const batteryPowerOutDataDaily =
-      calculateDailyDifference(batteryPowerOutData)
-    const gridPowerInDataDaily = calculateDailyDifference(gridPowerInData)
-    const gridPowerOutDataDaily = calculateDailyDifference(gridPowerOutData)
 
     const data = {
-      load: loadPowerDataDaily,
-      pv: pvPowerDataDaily,
-      gridIn: gridPowerInDataDaily,
-      gridOut: gridPowerOutDataDaily,
-      batteryCharged: batteryPowerInDataDaily,
-      batteryDischarged: batteryPowerOutDataDaily
+      load: calculateDailyDifference(loadPowerData),
+      pv: calculateDailyDifference(pvPowerData),
+      gridIn:  calculateDailyDifference(gridPowerData),
+      gridOut: calculateDailyDifference(gridVoltageData),
+      batteryCharged: calculateDailyDifference(batteryStateOfChargeData),
+      batteryDischarged: calculateDailyDifference(batteryPowerData)
     }
 
     return data
