@@ -177,25 +177,27 @@ function updateSystemState(topic, message) {
 async function saveMessageToInfluxDB(topic, message) {
     try {
         const parsedMessage = parseFloat(message.toString());
-        
+
         if (isNaN(parsedMessage)) {
             return;
         }
 
-        const point = {
+        const timestamp = new Date().getTime();
+        const dataPoint = {
             measurement: 'state',
+            fields: { value: parsedMessage },
             tags: { topic: topic },
-            fields: { 
-                value: parsedMessage,
-                raw_value: message.toString()
-            },
-            timestamp: new Date().getTime() * 1000000 // nanosecond precision
+            timestamp: timestamp * 1000000,
         };
 
-        await influx.writePoints([point]);
-
+        await retry(async () => {
+            await influx.writePoints([dataPoint]);
+        }, {
+            retries: 5,
+            minTimeout: 1000
+        });
     } catch (err) {
-        console.error('Error saving message to InfluxDB:', err);
+        console.error('Error saving message to InfluxDB:', err.response ? err.response.body : err.message);
     }
 }
 
