@@ -5,276 +5,276 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carbonoz SolarAutopilot</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-   <style>
-    :root {
-    --primary-color: #DEAF0B;
-    --bg-color: #f5f6fa;
-    --text-color: #2f3640;
-    --icon-color: #636e72;
-}
-
-body, html {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    background-color: var(--bg-color);
+    <style>
+        :root {
+        --primary-color: #DEAF0B;
+        --bg-color: #f5f6fa;
+        --text-color: #2f3640;
+        --icon-color: #636e72;
+    }
     
-}
-
-.container {
-    display: flex;
-    height: 100%;
-}
-
-.sidebar {
-    width: 280px;
-    background-color: white;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    transition: width 0.3s ease;
-    z-index: 10;
-}
-
-.sidebar.collapsed {
-    width: 80px;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    padding: 20px;
-}
-
-.logo-icon {
-    width: 50px;
-    height: 50px;
-    background-color: var(--primary-color);
-    border-radius: 8px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-weight: bold;
-    font-size: 20px;
-}
-
-.logo-text {
-    margin-left: 10px;
-    font-weight: bold;
-    color: var(--text-color);
-    font-size: 18px;
-}
-
-.logo-text .highlight {
-    color: #DEAF0B;
-}
-
-.search {
-    padding: 10px 20px;
-}
-
-.search input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #dcdde1;
-    border-radius: 4px;
-    font-size: 16px;
-}
-
-nav {
-    flex-grow: 1;
-}
-
-nav ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-nav li {
-    padding: 15px 20px;
-    display: flex;
-    align-items: center;
-    color: var(--text-color);
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: 18px;
-}
-nav li a{
-    text-decoration: none;
-    color: #2f3640;
-    font-weight: bold;
-}
-nav li:hover {
-    background-color: var(--bg-color);
-}
-
-nav li i {
-    margin-right: 15px;
-    color: var(--icon-color);
-    font-size: 24px;
-}
-
-.bottom-options {
-    padding: 20px;
-    border-top: 1px solid #dcdde1;
-}
-
-.toggle-sidebar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.toggle-text {
-    margin-right: 10px;
-}
-
-.toggle-switch {
-    width: 50px;
-    height: 25px;
-    background-color: #dcdde1;
-    border-radius: 12.5px;
-    position: relative;
-    transition: background-color 0.3s;
-}
-
-.toggle-switch::before {
-    content: '';
-    position: absolute;
-    width: 21px;
-    height: 21px;
-    border-radius: 50%;
-    background-color: white;
-    top: 2px;
-    left: 2px;
-    transition: transform 0.3s;
-}
-
-.toggle-switch.active {
-    background-color: var(--primary-color);
-}
-
-.toggle-switch.active::before {
-    transform: translateX(25px);
-}
-
-.sidebar.collapsed .logo-text,
-.sidebar.collapsed .search,
-.sidebar.collapsed nav li span,
-.sidebar.collapsed .toggle-text {
-    display: none;
-}
-
-.sidebar.collapsed .logo {
-    justify-content: center;
-}
-
-.sidebar.collapsed nav li {
-    justify-content: center;
-}
-
-.sidebar.collapsed nav li i {
-    margin-right: 0;
-}
-
-.main-container {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-header {
-    background-color: white;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: sticky;
-    top: 0;
-    z-index: 5;
-}
-
-.main-content {
-    flex-grow: 1;
-    padding: 20px;
-    overflow-y: auto;
-}
-
-.content-card {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    min-height: 100%;
-}
-
-footer {
-    background-color: var(--primary-color);
-    color: white;
-    text-align: center;
-    padding: 10px;
-}
-
-@media (max-width: 768px) {
+    body, html {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background-color: var(--bg-color);
+        
+    }
+    
     .container {
-        flex-direction: column;
+        display: flex;
+        height: 100%;
     }
-
-    .sidebar {
-        width: 100%;
-        height: auto;
-    }
-
-    .sidebar.collapsed {
-        width: 100%;
-    }
-
-    .main-container {
-        width: 100%;
-    }
-}
-
-/* loading css */
-
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #f8f9fa;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-  }
-  
-  .loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid #e0e0e0;
-    border-top: 5px solid #3498db;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
- .dashboard-enrgy{
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.05);
-    padding: 15px;
-    transition: all 0.3s ease;
-  
- }
     
-   </style>
+    .sidebar {
+        width: 280px;
+        background-color: white;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+        z-index: 10;
+    }
+    
+    .sidebar.collapsed {
+        width: 80px;
+    }
+    
+    .logo {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+    }
+    
+    .logo-icon {
+        width: 50px;
+        height: 50px;
+        background-color: var(--primary-color);
+        border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+        font-size: 20px;
+    }
+    
+    .logo-text {
+        margin-left: 10px;
+        font-weight: bold;
+        color: var(--text-color);
+        font-size: 18px;
+    }
+    
+    .logo-text .highlight {
+        color: #DEAF0B;
+    }
+    
+    .search {
+        padding: 10px 20px;
+    }
+    
+    .search input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #dcdde1;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    
+    nav {
+        flex-grow: 1;
+    }
+    
+    nav ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    nav li {
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        color: var(--text-color);
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 18px;
+    }
+    nav li a{
+        text-decoration: none;
+        color: #2f3640;
+        font-weight: bold;
+    }
+    nav li:hover {
+        background-color: var(--bg-color);
+    }
+    
+    nav li i {
+        margin-right: 15px;
+        color: var(--icon-color);
+        font-size: 24px;
+    }
+    
+    .bottom-options {
+        padding: 20px;
+        border-top: 1px solid #dcdde1;
+    }
+    
+    .toggle-sidebar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    
+    .toggle-text {
+        margin-right: 10px;
+    }
+    
+    .toggle-switch {
+        width: 50px;
+        height: 25px;
+        background-color: #dcdde1;
+        border-radius: 12.5px;
+        position: relative;
+        transition: background-color 0.3s;
+    }
+    
+    .toggle-switch::before {
+        content: '';
+        position: absolute;
+        width: 21px;
+        height: 21px;
+        border-radius: 50%;
+        background-color: white;
+        top: 2px;
+        left: 2px;
+        transition: transform 0.3s;
+    }
+    
+    .toggle-switch.active {
+        background-color: var(--primary-color);
+    }
+    
+    .toggle-switch.active::before {
+        transform: translateX(25px);
+    }
+    
+    .sidebar.collapsed .logo-text,
+    .sidebar.collapsed .search,
+    .sidebar.collapsed nav li span,
+    .sidebar.collapsed .toggle-text {
+        display: none;
+    }
+    
+    .sidebar.collapsed .logo {
+        justify-content: center;
+    }
+    
+    .sidebar.collapsed nav li {
+        justify-content: center;
+    }
+    
+    .sidebar.collapsed nav li i {
+        margin-right: 0;
+    }
+    
+    .main-container {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    
+    header {
+        background-color: white;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 5;
+    }
+    
+    .main-content {
+        flex-grow: 1;
+        padding: 20px;
+        overflow-y: auto;
+    }
+    
+    .content-card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        min-height: 100%;
+    }
+    
+    footer {
+        background-color: var(--primary-color);
+        color: white;
+        text-align: center;
+        padding: 10px;
+    }
+    
+    @media (max-width: 768px) {
+        .container {
+            flex-direction: column;
+        }
+    
+        .sidebar {
+            width: 100%;
+            height: auto;
+        }
+    
+        .sidebar.collapsed {
+            width: 100%;
+        }
+    
+        .main-container {
+            width: 100%;
+        }
+    }
+    
+    /* loading css */
+    
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #f8f9fa;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+      
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #e0e0e0;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    
+     .dashboard-enrgy{
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.05);
+        padding: 15px;
+        transition: all 0.3s ease;
+      
+     }
+        
+       </style>
 </head>
 <body>
    
@@ -320,7 +320,9 @@ footer {
                     <h2>Energy Distribution</h2>
                     <div id="energy-flow-diagram"></div>
                 </div>
-             
+                <div class="chart-container">
+                    <canvas id="EnergyChart"></canvas>
+                </div>
             </div>
 
             <footer>
@@ -527,5 +529,86 @@ setInterval(updateEnergyValues, 5000);
 updateEnergyValues();
 
     </script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('EnergyChart').getContext('2d');
+    const timeLabels = ['12:00 AM', '3:00 AM', '6:00 AM', '9:00 AM', '12:00 PM', '3:00 PM', '6:00 PM', '9:00 PM'];
+    
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: timeLabels,
+            datasets: [
+                {
+                    label: 'Solar',
+                    backgroundColor: 'rgba(255, 206, 86, 0.8)',
+                },
+                {
+                    label: 'Grid In',
+                    backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                },
+                {
+                    label: 'Battery In',
+                    backgroundColor: 'rgba(153, 102, 255, 0.8)',
+                },
+                {
+                    label: 'Grid Out',
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                },
+                {
+                    label: 'Battery Out',
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    stacked: true,
+                },
+                y: {
+                    stacked: true,
+                    title: {
+                        display: true,
+                        text: 'kWh'
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Energy Usage'
+                },
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    });
+
+    function updateChart() {
+        fetch('<%= ingress_path %>/api/energy_chart')
+            .then(response => response.json())
+            .then(data => {
+                chart.data.datasets[0].data = data.solar;
+                chart.data.datasets[1].data = data.gridIn;
+                chart.data.datasets[2].data = data.batteryIn;
+                chart.data.datasets[3].data = data.gridOut;
+                chart.data.datasets[4].data = data.batteryOut;
+                chart.update();
+            })
+            .catch(error => console.error('Error fetching chart data:', error));
+    }
+
+    // Update chart every 5 minutes
+    setInterval(updateChart, 300000);
+
+    // Initial update
+    updateChart();
+});
+</script>
 </body>
 </html>
