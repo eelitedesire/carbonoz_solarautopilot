@@ -282,67 +282,91 @@ footer {
 
 .filter-container {
             background-color: white;
-            padding: 20px;
+            padding: 15px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+        }
+
+        .filter-container {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
         }
 
         .filter-container label {
-            display: inline-block;
-            margin-right: 10px;
+            display: block;
+            margin-bottom: 5px;
             font-weight: bold;
+            font-size: 14px;
         }
 
         .filter-container input,
         .filter-container select {
-            margin-right: 20px;
-            padding: 8px;
+            width: 100%;
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 16px;
+            box-sizing: border-box;
         }
 
         .filter-container button {
+            width: 100%;
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px;
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            font-size: 16px;
+            font-weight: bold;
         }
 
         .filter-container button:hover {
             background-color: #2980b9;
         }
 
-        .dashboard-container {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
         .dashboard-container iframe {
             width: 100%;
-            height: calc(100vh - 120px);
+            height: calc(100vh - 340px);
             border: none;
             display: block;
         }
 
-        @media (max-width: 768px) {
-            .filter-container {
-                display: flex;
-                flex-direction: column;
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
             }
 
-            .filter-container label,
-            .filter-container input,
-            .filter-container select,
+            .filter-container {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-end;
+                padding: 20px;
+            }
+
+            .form-group {
+                flex: 1;
+                margin-right: 15px;
+                margin-bottom: 0;
+            }
+
             .filter-container button {
-                margin-bottom: 10px;
-                width: 100%;
+                width: auto;
+                padding: 10px 20px;
+                margin-top: 20px;
+            }
+
+            .dashboard-container iframe {
+                height: calc(100vh - 120px);
             }
         }
   
@@ -392,23 +416,26 @@ footer {
                  
 
                     <div class="filter-container">
-                        <label for="from">From:</label>
-                        <input type="datetime-local" id="from" name="from">
-                        <label for="to">To:</label>
-                        <input type="datetime-local" id="to" name="to">
-                
-                        <label for="timezone">Time Zone:</label>
-                        <select id="timezone" name="timezone">
-                            <option value="UTC">UTC</option>
-                            <option value="America/New_York">America/New_York</option>
-                            <option value="Europe/London">Europe/London</option>
-                            <option value="Asia/Tokyo">Asia/Tokyo</option>
-                            <option value="Africa/Kigali">Africa/Kigali</option>
-                            <option value="Indian/Mauritius">Indian/Mauritius</option>
-                            <option value="America/Cayman">America/Cayman</option>
-                            <!-- Add more time zones as needed -->
-                        </select>
-                
+                        <div class="form-group">
+                            <label for="from">From:</label>
+                            <input type="datetime-local" id="from" name="from">
+                        </div>
+                        <div class="form-group">
+                            <label for="to">To:</label>
+                            <input type="datetime-local" id="to" name="to">
+                        </div>
+                        <div class="form-group">
+                            <label for="timezone">Time Zone:</label>
+                            <select id="timezone" name="timezone">
+                                <option value="UTC">UTC</option>
+                                <option value="America/New_York">America/New_York</option>
+                                <option value="Europe/London">Europe/London</option>
+                                <option value="Asia/Tokyo">Asia/Tokyo</option>
+                                <option value="Africa/Kigali">Africa/Kigali</option>
+                                <option value="Indian/Mauritius">Indian/Mauritius</option>
+                                <option value="America/Cayman">America/Cayman</option>
+                            </select>
+                        </div>
                         <button onclick="updateIframe()">Apply</button>
                     </div>
                 
