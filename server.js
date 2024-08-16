@@ -1,31 +1,24 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const mqtt = require('mqtt');
-const fs = require('fs');
-const path = require('path');
-const Influx = require('influx');
-const ejs = require('ejs');
-const moment = require('moment-timezone');
-const WebSocket = require('ws');
-const retry = require('async-retry');
+const express = require('express')
+const bodyParser = require('body-parser')
+const mqtt = require('mqtt')
+const fs = require('fs')
+const path = require('path')
+const Influx = require('influx')
+const ejs = require('ejs')
+const moment = require('moment-timezone')
+const WebSocket = require('ws')
+const retry = require('async-retry')
 
-const app = express();
-const port = process.env.PORT || 6789;
+const app = express()
+const port = process.env.PORT || 6789
 const socketPort = 7100
 const { http } = require('follow-redirects')
 const cors = require('cors')
-const socketIO = require('socket.io')
-const httpServer = require('http')
-const { connectDatabase,prisma } = require('./config/mongodb')
-
-
+const { connectDatabase, prisma } = require('./config/mongodb')
+const { startOfDay } = require('date-fns')
 
 // Middleware setup
-app.use(cors(
-  {origin: '*', 
-  methods: ['GET', 'POST'],
-  allowedHeaders: '*',}
-))
+app.use(cors({ origin: '*', methods: ['GET', 'POST'], allowedHeaders: '*' }))
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(express.static('public'))
@@ -36,14 +29,14 @@ const options = JSON.parse(fs.readFileSync('/data/options.json', 'utf8'))
 
 // InfluxDB configuration
 const influxConfig = {
-    host: options.mqtt_host,
-    port: 8086,
-    database: options.database_name,
-    username: options.database_username,
-    password: options.database_password,
-    protocol: 'http',
-    timeout: 10000
-};
+  host: options.mqtt_host,
+  port: 8086,
+  database: options.database_name,
+  username: options.database_username,
+  password: options.database_password,
+  protocol: 'http',
+  timeout: 10000,
+}
 const influx = new Influx.InfluxDB(influxConfig)
 
 // MQTT configuration
@@ -70,15 +63,15 @@ function connectToMqtt() {
     mqttClient.subscribe('solar_assistant_DEYE/#')
   })
 
-mqttClient.on('message', (topic, message) => {
-    const formattedMessage = `${topic}: ${message.toString()}`;
-    incomingMessages.push(formattedMessage);
+  mqttClient.on('message', (topic, message) => {
+    const formattedMessage = `${topic}: ${message.toString()}`
+    incomingMessages.push(formattedMessage)
     if (incomingMessages.length > MAX_MESSAGES) {
-        incomingMessages.shift();
+      incomingMessages.shift()
     }
-    saveMessageToInfluxDB(topic, message);
-    updateSystemState(topic, message);
-});
+    saveMessageToInfluxDB(topic, message)
+    updateSystemState(topic, message)
+  })
 
   mqttClient.on('error', (err) => {
     console.error('Error connecting to MQTT broker:', err.message)
@@ -175,32 +168,37 @@ function updateSystemState(topic, message) {
 
 // Save MQTT message to InfluxDB
 async function saveMessageToInfluxDB(topic, message) {
-    try {
-        const parsedMessage = parseFloat(message.toString());
+  try {
+    const parsedMessage = parseFloat(message.toString())
 
-        if (isNaN(parsedMessage)) {
-            return;
-        }
-
-        const timestamp = new Date().getTime();
-        const dataPoint = {
-            measurement: 'state',
-            fields: { value: parsedMessage },
-            tags: { topic: topic },
-            timestamp: timestamp * 1000000,
-        };
-
-        await retry(async () => {
-            await influx.writePoints([dataPoint]);
-        }, {
-            retries: 5,
-            minTimeout: 1000
-        });
-    } catch (err) {
-        console.error('Error saving message to InfluxDB:', err.response ? err.response.body : err.message);
+    if (isNaN(parsedMessage)) {
+      return
     }
-}
 
+    const timestamp = new Date().getTime()
+    const dataPoint = {
+      measurement: 'state',
+      fields: { value: parsedMessage },
+      tags: { topic: topic },
+      timestamp: timestamp * 1000000,
+    }
+
+    await retry(
+      async () => {
+        await influx.writePoints([dataPoint])
+      },
+      {
+        retries: 5,
+        minTimeout: 1000,
+      }
+    )
+  } catch (err) {
+    console.error(
+      'Error saving message to InfluxDB:',
+      err.response ? err.response.body : err.message
+    )
+  }
+}
 
 // Fetch current value from InfluxDB
 async function getCurrentValue(topic) {
@@ -264,62 +262,70 @@ async function queryInfluxDB(topic) {
 function calculateDailyDifference(data) {
   return data.map((current, index, array) => {
     if (index === 0 || !array[index - 1].value) {
-      return { ...current, difference: 0 };
+      return { ...current, difference: 0 }
     } else {
-      const previousData = array[index - 1].value;
-      const currentData = current.value;
-      const difference = currentData >= previousData ? currentData - previousData : currentData;
-      return { ...current, difference: parseFloat(difference.toFixed(1)) };
+      const previousData = array[index - 1].value
+      const currentData = current.value
+      const difference =
+        currentData >= previousData ? currentData - previousData : currentData
+      return { ...current, difference: parseFloat(difference.toFixed(1)) }
     }
-  });
+  })
 }
 
 function calculateDailyDifferenceForSockets(data) {
-  return data.map((current, index, array) => {
-    if (index === 0 || !array[index - 1].value) {
-      let difference = 0
-      return difference;
-    } else {
-      const previousData = array[index - 1].value;
-      const currentData = current.value;
-      const difference = currentData >= previousData ? currentData - previousData : currentData;
-      let newDifference = parseFloat(difference.toFixed(1));
-      return  newDifference
-    }
-  }).join('');
+  return data
+    .map((current, index, array) => {
+      if (index === 0 || !array[index - 1].value) {
+        let difference = 0
+        return difference
+      } else {
+        const previousData = array[index - 1].value
+        const currentData = current.value
+        const difference =
+          currentData >= previousData ? currentData - previousData : currentData
+        let newDifference = parseFloat(difference.toFixed(1))
+        return newDifference
+      }
+    })
+    .join('')
 }
 
 function calculateLastTwoDaysDifference(data) {
-  const dataLength = data.length;
+  const dataLength = data.length
 
   if (dataLength < 2) {
     // If there's not enough data, return 0
-    return [{
-      time: new Date(),
-      difference: 0,
-    }];
+    return [
+      {
+        time: new Date(),
+        difference: 0,
+      },
+    ]
   }
 
-  const latestDay = data[dataLength - 1];
-  const previousDay = data[dataLength - 2];
+  const latestDay = data[dataLength - 1]
+  const previousDay = data[dataLength - 2]
 
-  let difference;
-  
+  let difference
+
   if (!previousDay.value) {
     // If no data for the previous day, display zero
-    difference = 0;
+    difference = 0
   } else if (latestDay.value <= previousDay.value) {
     // If current day's data is less than or equal to previous day's data, display it as is
-    difference = latestDay.value;
+    difference = latestDay.value
   } else {
     // If current day's data is greater, calculate the difference
-    difference = latestDay.value - previousDay.value;
+    difference = latestDay.value - previousDay.value
   }
 
-  return [{
-    time: latestDay.time,
-    difference: parseFloat(difference.toFixed(1)),
-  }];
+  return [
+    {
+      time: latestDay.time,
+      difference: parseFloat(difference.toFixed(1)),
+    },
+  ]
 }
 
 // Route handlers
@@ -345,22 +351,36 @@ app.get('/chart', (req, res) => {
   })
 })
 
-
 app.get('/dashboard', async (req, res) => {
   try {
-    const loadPowerData = await getCurrentValue('solar_assistant_DEYE/total/load_energy/state');
-    const pvPowerData = await getCurrentValue('solar_assistant_DEYE/total/pv_energy/state');
-    const batteryPowerInData = await getCurrentValue('solar_assistant_DEYE/total/battery_energy_in/state');
-    const batteryPowerOutData = await getCurrentValue('solar_assistant_DEYE/total/battery_energy_out/state');
-    const gridPowerInData = await getCurrentValue('solar_assistant_DEYE/total/grid_energy_in/state');
-    const gridPowerOutData = await getCurrentValue('solar_assistant_DEYE/total/grid_energy_out/state');
+    const loadPowerData = await getCurrentValue(
+      'solar_assistant_DEYE/total/load_energy/state'
+    )
+    const pvPowerData = await getCurrentValue(
+      'solar_assistant_DEYE/total/pv_energy/state'
+    )
+    const batteryPowerInData = await getCurrentValue(
+      'solar_assistant_DEYE/total/battery_energy_in/state'
+    )
+    const batteryPowerOutData = await getCurrentValue(
+      'solar_assistant_DEYE/total/battery_energy_out/state'
+    )
+    const gridPowerInData = await getCurrentValue(
+      'solar_assistant_DEYE/total/grid_energy_in/state'
+    )
+    const gridPowerOutData = await getCurrentValue(
+      'solar_assistant_DEYE/total/grid_energy_out/state'
+    )
 
-    const loadPowerDataDaily = calculateLastTwoDaysDifference(loadPowerData);
-    const pvPowerDataDaily = calculateLastTwoDaysDifference(pvPowerData);
-    const batteryPowerInDataDaily = calculateLastTwoDaysDifference(batteryPowerInData);
-    const batteryPowerOutDataDaily = calculateLastTwoDaysDifference(batteryPowerOutData);
-    const gridPowerInDataDaily = calculateLastTwoDaysDifference(gridPowerInData);
-    const gridPowerOutDataDaily = calculateLastTwoDaysDifference(gridPowerOutData);
+    const loadPowerDataDaily = calculateLastTwoDaysDifference(loadPowerData)
+    const pvPowerDataDaily = calculateLastTwoDaysDifference(pvPowerData)
+    const batteryPowerInDataDaily =
+      calculateLastTwoDaysDifference(batteryPowerInData)
+    const batteryPowerOutDataDaily =
+      calculateLastTwoDaysDifference(batteryPowerOutData)
+    const gridPowerInDataDaily = calculateLastTwoDaysDifference(gridPowerInData)
+    const gridPowerOutDataDaily =
+      calculateLastTwoDaysDifference(gridPowerOutData)
 
     const data = {
       loadDifference: loadPowerDataDaily[0].difference,
@@ -369,33 +389,48 @@ app.get('/dashboard', async (req, res) => {
       batteryDischargeDifference: batteryPowerOutDataDaily[0].difference,
       gridInDifference: gridPowerInDataDaily[0].difference,
       gridOutDifference: gridPowerOutDataDaily[0].difference,
-    };
+    }
 
     res.render('dashboard', {
       data,
       ingress_path: process.env.INGRESS_PATH || '',
-    });
+    })
   } catch (error) {
-    console.error('Error fetching data for dashboard:', error);
-    res.status(500).json({ error: 'Error fetching data for dashboard' });
+    console.error('Error fetching data for dashboard:', error)
+    res.status(500).json({ error: 'Error fetching data for dashboard' })
   }
-});
+})
 
 app.get('/api/energy', async (req, res) => {
   try {
-    const loadPowerData = await getCurrentValue('solar_assistant_DEYE/total/load_energy/state');
-    const pvPowerData = await getCurrentValue('solar_assistant_DEYE/total/pv_energy/state');
-    const batteryPowerInData = await getCurrentValue('solar_assistant_DEYE/total/battery_energy_in/state');
-    const batteryPowerOutData = await getCurrentValue('solar_assistant_DEYE/total/battery_energy_out/state');
-    const gridPowerInData = await getCurrentValue('solar_assistant_DEYE/total/grid_energy_in/state');
-    const gridPowerOutData = await getCurrentValue('solar_assistant_DEYE/total/grid_energy_out/state');
+    const loadPowerData = await getCurrentValue(
+      'solar_assistant_DEYE/total/load_energy/state'
+    )
+    const pvPowerData = await getCurrentValue(
+      'solar_assistant_DEYE/total/pv_energy/state'
+    )
+    const batteryPowerInData = await getCurrentValue(
+      'solar_assistant_DEYE/total/battery_energy_in/state'
+    )
+    const batteryPowerOutData = await getCurrentValue(
+      'solar_assistant_DEYE/total/battery_energy_out/state'
+    )
+    const gridPowerInData = await getCurrentValue(
+      'solar_assistant_DEYE/total/grid_energy_in/state'
+    )
+    const gridPowerOutData = await getCurrentValue(
+      'solar_assistant_DEYE/total/grid_energy_out/state'
+    )
 
-    const loadPowerDataDaily = calculateLastTwoDaysDifference(loadPowerData);
-    const pvPowerDataDaily = calculateLastTwoDaysDifference(pvPowerData);
-    const batteryPowerInDataDaily = calculateLastTwoDaysDifference(batteryPowerInData);
-    const batteryPowerOutDataDaily = calculateLastTwoDaysDifference(batteryPowerOutData);
-    const gridPowerInDataDaily = calculateLastTwoDaysDifference(gridPowerInData);
-    const gridPowerOutDataDaily = calculateLastTwoDaysDifference(gridPowerOutData);
+    const loadPowerDataDaily = calculateLastTwoDaysDifference(loadPowerData)
+    const pvPowerDataDaily = calculateLastTwoDaysDifference(pvPowerData)
+    const batteryPowerInDataDaily =
+      calculateLastTwoDaysDifference(batteryPowerInData)
+    const batteryPowerOutDataDaily =
+      calculateLastTwoDaysDifference(batteryPowerOutData)
+    const gridPowerInDataDaily = calculateLastTwoDaysDifference(gridPowerInData)
+    const gridPowerOutDataDaily =
+      calculateLastTwoDaysDifference(gridPowerOutData)
 
     const data = {
       loadDifference: loadPowerDataDaily[0].difference,
@@ -404,43 +439,58 @@ app.get('/api/energy', async (req, res) => {
       batteryDischargeDifference: batteryPowerOutDataDaily[0].difference,
       gridInDifference: gridPowerInDataDaily[0].difference,
       gridOutDifference: gridPowerOutDataDaily[0].difference,
-    };
+    }
 
-    res.json(data);
+    res.json(data)
   } catch (error) {
-    console.error('Error fetching energy data:', error);
-    res.status(500).json({ error: 'Error fetching energy data' });
+    console.error('Error fetching energy data:', error)
+    res.status(500).json({ error: 'Error fetching energy data' })
   }
-});
-
+})
 
 app.get('/analytics', async (req, res) => {
   try {
-    const loadPowerData = await queryInfluxDB('solar_assistant_DEYE/total/load_energy/state');
-    const pvPowerData = await queryInfluxDB('solar_assistant_DEYE/total/pv_energy/state');
-    const batteryStateOfChargeData = await queryInfluxDB('solar_assistant_DEYE/total/battery_energy_in/state');
-    const batteryPowerData = await queryInfluxDB('solar_assistant_DEYE/total/battery_energy_out/state');
-    const gridPowerData = await queryInfluxDB('solar_assistant_DEYE/total/grid_energy_in/state');
-    const gridVoltageData = await queryInfluxDB('solar_assistant_DEYE/total/grid_energy_out/state');
+    const loadPowerData = await queryInfluxDB(
+      'solar_assistant_DEYE/total/load_energy/state'
+    )
+    const pvPowerData = await queryInfluxDB(
+      'solar_assistant_DEYE/total/pv_energy/state'
+    )
+    const batteryStateOfChargeData = await queryInfluxDB(
+      'solar_assistant_DEYE/total/battery_energy_in/state'
+    )
+    const batteryPowerData = await queryInfluxDB(
+      'solar_assistant_DEYE/total/battery_energy_out/state'
+    )
+    const gridPowerData = await queryInfluxDB(
+      'solar_assistant_DEYE/total/grid_energy_in/state'
+    )
+    const gridVoltageData = await queryInfluxDB(
+      'solar_assistant_DEYE/total/grid_energy_out/state'
+    )
 
     const data = {
       loadPowerData: calculateDailyDifference(loadPowerData),
       pvPowerData: calculateDailyDifference(pvPowerData),
-      batteryStateOfChargeData: calculateDailyDifference(batteryStateOfChargeData),
+      batteryStateOfChargeData: calculateDailyDifference(
+        batteryStateOfChargeData
+      ),
       batteryPowerData: calculateDailyDifference(batteryPowerData),
       gridPowerData: calculateDailyDifference(gridPowerData),
       gridVoltageData: calculateDailyDifference(gridVoltageData),
-    };
+    }
 
     res.render('analytics', {
       data,
       ingress_path: process.env.INGRESS_PATH || '',
-    });
+    })
   } catch (error) {
-    console.error('Error fetching analytics data from InfluxDB:', error);
-    res.status(500).json({ error: 'Error fetching analytics data from InfluxDB' });
+    console.error('Error fetching analytics data from InfluxDB:', error)
+    res
+      .status(500)
+      .json({ error: 'Error fetching analytics data from InfluxDB' })
   }
-});
+})
 
 app.get('/', async (req, res) => {
   try {
@@ -782,65 +832,42 @@ function compareNumeric(actual, operator, expected) {
 }
 
 //socket server setup
-const IOserver = httpServer.createServer(app)
-const io = socketIO(IOserver, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
-  },
-})
 
-//socket on connection
-io.on('connection', (socket) => {
-  console.log('connection ok')
-  try {
-    const getRealTimeData = async () => {
-    const loadPowerData = await queryInfluxDB('solar_assistant_DEYE/total/load_energy/state');
-    const pvPowerData = await queryInfluxDB('solar_assistant_DEYE/total/pv_energy/state');
-    const batteryStateOfChargeData = await queryInfluxDB('solar_assistant_DEYE/total/battery_energy_in/state');
-    const batteryPowerData = await queryInfluxDB('solar_assistant_DEYE/total/battery_energy_out/state');
-    const gridPowerData = await queryInfluxDB('solar_assistant_DEYE/total/grid_energy_in/state');
-    const gridVoltageData = await queryInfluxDB('solar_assistant_DEYE/total/grid_energy_out/state');
+//socket data
+const getRealTimeData = async () => {
+  const loadPowerData = await queryInfluxDB(
+    'solar_assistant_DEYE/total/load_energy/state'
+  )
+  const pvPowerData = await queryInfluxDB(
+    'solar_assistant_DEYE/total/pv_energy/state'
+  )
+  const batteryStateOfChargeData = await queryInfluxDB(
+    'solar_assistant_DEYE/total/battery_energy_in/state'
+  )
+  const batteryPowerData = await queryInfluxDB(
+    'solar_assistant_DEYE/total/battery_energy_out/state'
+  )
+  const gridPowerData = await queryInfluxDB(
+    'solar_assistant_DEYE/total/grid_energy_in/state'
+  )
+  const gridVoltageData = await queryInfluxDB(
+    'solar_assistant_DEYE/total/grid_energy_out/state'
+  )
 
-
-    const data = {
-      load: calculateDailyDifferenceForSockets(loadPowerData),
-      pv: calculateDailyDifferenceForSockets(pvPowerData),
-      gridIn:  calculateDailyDifferenceForSockets(gridPowerData),
-      gridOut: calculateDailyDifferenceForSockets(gridVoltageData),
-      batteryCharged: calculateDailyDifferenceForSockets(batteryStateOfChargeData),
-      batteryDischarged: calculateDailyDifferenceForSockets(batteryPowerData)
-    }
-
-    return data
+  const data = {
+    load: calculateDailyDifferenceForSockets(loadPowerData),
+    pv: calculateDailyDifferenceForSockets(pvPowerData),
+    gridIn: calculateDailyDifferenceForSockets(gridPowerData),
+    gridOut: calculateDailyDifferenceForSockets(gridVoltageData),
+    batteryCharged: calculateDailyDifferenceForSockets(
+      batteryStateOfChargeData
+    ),
+    batteryDischarged: calculateDailyDifferenceForSockets(batteryPowerData),
   }
-  mqttClient.on('message', async (topic, message) => {
-    const { load, pv, gridIn, gridOut, batteryCharged, batteryDischarged } =
-      await getRealTimeData()
-    const topics = await prisma.topic.findMany()
-    topics.forEach((t) => {
-      io.emit('mqttMessage', {
-        date: new Date(),
-        userId: t.userId,
-        pv,
-        load,
-        gridIn,
-        gridOut,
-        batteryCharged,
-        batteryDischarged,
-      })
-    })
-  })
-  } catch (error) {
-    console.error('Error processing MQTT message:', error)
-  }
-})
 
-// WebSocket setup
-
-IOserver.listen(socketPort,'0.0.0.0',()=>{
-  console.log(`Socket server is running on http://0.0.0.0:${socketPort}`)
-})
+  return data
+}
+//send  on connection
 
 const server = app.listen(port, '0.0.0.0', async () => {
   console.log(`Server is running on http://0.0.0.0:${port}`)
@@ -854,9 +881,9 @@ const wss = new WebSocket.Server({ server })
 
 wss.on('connection', (ws) => {
   console.log('Client connected')
-   ws.on('error', (error) => {
-    console.error('WebSocket error:', error);
-  });
+  ws.on('error', (error) => {
+    console.error('WebSocket error:', error)
+  })
   ws.on('close', () => console.log('Client disconnected'))
 })
 
@@ -867,6 +894,35 @@ function broadcastMessage(message) {
     }
   })
 }
+
+mqttClient.on('message', async () => {
+  const { load, pv, gridIn, gridOut, batteryCharged, batteryDischarged } =
+    await getRealTimeData()
+  const topics = await prisma.topic.findMany()
+  const port = options.mqtt_host
+  const date = startOfDay(new Date()).toISOString()
+  topics.forEach((t) => {
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        topics.forEach((t) => {
+          client.send(
+            JSON.stringify({
+              date,
+              userId: t.userId,
+              pv,
+              load,
+              gridIn,
+              gridOut,
+              batteryCharged,
+              batteryDischarged,
+              port,
+            })
+          )
+        })
+      }
+    })
+  })
+})
 
 // Scheduled tasks
 setInterval(applyScheduledSettings, 60000) // Run every minute
@@ -882,7 +938,5 @@ app.use((err, req, res, next) => {
 app.use((req, res, next) => {
   res.status(404).send("Sorry, that route doesn't exist.")
 })
-
-
 
 module.exports = { app, server }
