@@ -881,6 +881,34 @@ const wss = new WebSocket.Server({ server })
 
 wss.on('connection', (ws) => {
   console.log('Client connected')
+  mqttClient.on('message', async () => {
+    const { load, pv, gridIn, gridOut, batteryCharged, batteryDischarged } =
+      await getRealTimeData()
+    const topics = await prisma.topic.findMany()
+    const port = options.mqtt_host
+    const date = startOfDay(new Date()).toISOString()
+    topics.forEach((t) => {
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          topics.forEach((t) => {
+            client.send(
+              JSON.stringify({
+                date,
+                userId: t.userId,
+                pv,
+                load,
+                gridIn,
+                gridOut,
+                batteryCharged,
+                batteryDischarged,
+                port,
+              })
+            )
+          })
+        }
+      })
+    })
+  })
   ws.on('error', (error) => {
     console.error('WebSocket error:', error)
   })
@@ -894,35 +922,6 @@ function broadcastMessage(message) {
     }
   })
 }
-
-mqttClient.on('message', async () => {
-  const { load, pv, gridIn, gridOut, batteryCharged, batteryDischarged } =
-    await getRealTimeData()
-  const topics = await prisma.topic.findMany()
-  const port = options.mqtt_host
-  const date = startOfDay(new Date()).toISOString()
-  topics.forEach((t) => {
-    wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        topics.forEach((t) => {
-          client.send(
-            JSON.stringify({
-              date,
-              userId: t.userId,
-              pv,
-              load,
-              gridIn,
-              gridOut,
-              batteryCharged,
-              batteryDischarged,
-              port,
-            })
-          )
-        })
-      }
-    })
-  })
-})
 
 // Scheduled tasks
 setInterval(applyScheduledSettings, 60000) // Run every minute
