@@ -887,6 +887,7 @@ wss.on('connection', (ws) => {
     const topics = await prisma.topic.findMany()
     const port = options.mqtt_host
     const date = startOfDay(new Date()).toISOString()
+    const isForServer = true
     topics.forEach((t) => {
       wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
@@ -902,6 +903,7 @@ wss.on('connection', (ws) => {
                 batteryCharged,
                 batteryDischarged,
                 port,
+                isForServer,
               })
             )
           })
