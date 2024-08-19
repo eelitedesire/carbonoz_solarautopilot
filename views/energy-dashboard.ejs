@@ -640,40 +640,48 @@ footer {
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <script>
-      function updateGauges() {
-          fetch('<%= ingress_path %>/api/realtime-data')
-              .then(response => response.json())
-              .then(data => {
-                  updateGauge('loadPower', data.loadPower.value, 10000, 'W');
-                  updateGauge('solarProduction', data.solarProduction.value, 10000, 'W');
-                  updateGauge('gridVoltage', data.gridVoltage.value, 500, 'V');
-                  updateGauge('gridImport', data.gridImport.value, 10000, 'W');
-                  updateGauge('batteryStateOfCharge', data.batteryStateOfCharge.value, 100, '%');
-                  updateGauge('BatteryPower', data.BatteryPower.value, 10000, 'W');
-                  updateGauge('BatteryVoltage', data.BatteryVoltage.value, 100, 'V');  // New BatteryVoltage gauge
-              })
-              .catch(error => console.error('Error fetching real-time data:', error));
-      }
-  
-      function updateGauge(type, value, maxValue, unit) {
-          const gauge = document.querySelector(`.gauge[data-type="${type}"]`);
-          if (!gauge) return;
-  
-          const mask = gauge.querySelector('.semi-circle--mask');
-          const valueElement = gauge.querySelector('.value');
-  
-          value = Number(value);
-          if (isNaN(value)) value = 0;
-          value = Math.max(0, Math.min(value, maxValue));
-  
-          const rotation = (value / maxValue) * 180;
-  
-          mask.style.transform = `rotate(${rotation}deg)`;
-          valueElement.textContent = `${value} ${unit}`;
-      }
-  
-      setInterval(updateGauges, 5000);
-      document.addEventListener('DOMContentLoaded', updateGauges);
+  function updateGauges() {
+    fetch('<%= ingress_path %>/api/realtime-data')
+        .then(response => response.json())
+        .then(data => {
+            updateGauge('loadPower', data.loadPower.value, 10000, 'W');
+            updateGauge('solarProduction', data.solarProduction.value, 10000, 'W');
+            updateGauge('gridVoltage', data.gridVoltage.value, 500, 'V');
+            updateGauge('gridImport', data.gridImport.value, 10000, 'W'); // gridImport can have negative values
+            updateGauge('batteryStateOfCharge', data.batteryStateOfCharge.value, 100, '%');
+            updateGauge('BatteryPower', data.BatteryPower.value, 10000, 'W'); // BatteryPower can have negative values
+            updateGauge('BatteryVoltage', data.BatteryVoltage.value, 100, 'V');
+        })
+        .catch(error => console.error('Error fetching real-time data:', error));
+}
+
+function updateGauge(type, value, maxValue, unit) {
+    const gauge = document.querySelector(`.gauge[data-type="${type}"]`);
+    if (!gauge) return;
+
+    const mask = gauge.querySelector('.semi-circle--mask');
+    const valueElement = gauge.querySelector('.value');
+
+    value = Number(value);
+    if (isNaN(value)) value = 0;
+
+    // Adjust range to handle negative values
+    const minValue = type === 'BatteryPower' || type === 'gridImport' ? -maxValue : 0;
+    value = Math.max(minValue, Math.min(value, maxValue));
+
+    // Adjust rotation to handle negative values
+    const rotation = ((value - minValue) / (maxValue - minValue)) * 180;
+
+    mask.style.transform = `rotate(${rotation}deg)`;
+    valueElement.textContent = `${value} ${unit}`;
+}
+
+// Update gauges every 5 seconds
+setInterval(updateGauges, 5000);
+
+// Initial update
+document.addEventListener('DOMContentLoaded', updateGauges);
+
   </script>
   
     
