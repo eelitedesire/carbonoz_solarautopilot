@@ -876,7 +876,7 @@ wss.on('connection', (ws) => {
       await getRealTimeData()
     const topics = await prisma.topic.findMany()
     const port = options.mqtt_host
-    const date = startOfDay(new Date()).toISOString()
+    const date = new Date()
     const isForServer = true
     topics.forEach((t) => {
       wss.clients.forEach((client) => {
