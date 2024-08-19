@@ -593,11 +593,22 @@ footer {
                             <div class="label">Battery</div>
                         </div>
                     </div>
+
+                    <div class="half">
+                      <div class="gauge" data-type="BatteryVoltage">
+                          <div class="mask">
+                              <div class="semi-circle aqua"></div>
+                              <div class="semi-circle--mask"></div>
+                          </div>
+                          <div class="value"></div>
+                          <div class="label">Battery V</div>
+                      </div>
+                  </div>
                 </div>
                 
                     <div class="dashboard-column">
                         <div class="card">
-                            <iframe src="http://192.168.160.55:3000/d-solo/solar_dashboard?orgId=1&refresh=1m&panelId=2&theme=light" class="iframe-overview" scrolling="no"
+                            <iframe src="http://<%= mqtt_host %>:3000/d-solo/solar_dashboard?orgId=1&refresh=1m&panelId=2&theme=light" class="iframe-overview" scrolling="no"
                                     frameborder="0">
                             </iframe>
                         </div>
@@ -605,10 +616,10 @@ footer {
                 
                     <div class="dashboard-column">
                         <div class="card column-4">
-                            <iframe src="http://192.168.160.55:3000/d-solo/solar_dashboard?orgId=1&refresh=1m&panelId=217&theme=light" class="iframe-battery-power"
+                            <iframe src="http://<%= mqtt_host %>:3000/d-solo/solar_dashboard?orgId=1&refresh=1m&panelId=217&theme=light" class="iframe-battery-power"
                                     scrolling="no" frameborder="0">
                             </iframe>
-                            <iframe src="http://192.168.160.55:3000/d-solo/solar_dashboard??orgId=1&refresh=1m&panelId=139&theme=light" class="iframe-battery-soc"
+                            <iframe src="http://<%= mqtt_host %>:3000/d-solo/solar_dashboard??orgId=1&refresh=1m&panelId=139&theme=light" class="iframe-battery-soc"
                                     scrolling="no" frameborder="0">
                             </iframe>
                         </div>
@@ -639,6 +650,7 @@ footer {
                   updateGauge('gridImport', data.gridImport.value, 10000, 'W');
                   updateGauge('batteryStateOfCharge', data.batteryStateOfCharge.value, 100, '%');
                   updateGauge('BatteryPower', data.BatteryPower.value, 10000, 'W');
+                  updateGauge('BatteryVoltage', data.BatteryVoltage.value, 100, 'V');  // New BatteryVoltage gauge
               })
               .catch(error => console.error('Error fetching real-time data:', error));
       }
@@ -663,6 +675,7 @@ footer {
       setInterval(updateGauges, 5000);
       document.addEventListener('DOMContentLoaded', updateGauges);
   </script>
+  
     
        
        <script>
