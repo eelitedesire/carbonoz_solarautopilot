@@ -510,17 +510,21 @@ app.get('/', async (req, res) => {
       'solar_assistant_DEYE/total/grid_voltage/state'
     )
 
+    const BatteryPower = await getCurrentData('solar_assistant_DEYE/total/battery_power/state')
+
     const data = {
       loadPower,
       solarProduction,
       batteryStateOfCharge,
       gridImport,
       gridVoltage,
+      BatteryPower,
     }
 
     res.render('energy-dashboard', {
       data,
       ingress_path: process.env.INGRESS_PATH || '',
+      mqtt_host: options.mqtt_host,
     })
   } catch (error) {
     console.error('Error fetching data from InfluxDB:', error)
@@ -545,13 +549,14 @@ app.get('/api/realtime-data', async (req, res) => {
     const gridVoltage = await getCurrentData(
       'solar_assistant_DEYE/total/grid_voltage/state'
     )
-
+    const BatteryPower = await getCurrentData('solar_assistant_DEYE/total/battery_power/state')
     const data = {
       loadPower,
       solarProduction,
       batteryStateOfCharge,
       gridImport,
       gridVoltage,
+      BatteryPower,
     }
 
     res.json(data)
@@ -560,6 +565,7 @@ app.get('/api/realtime-data', async (req, res) => {
     res.status(500).json({ error: 'Error fetching real-time data' })
   }
 })
+
 
 // Universal Settings
 app.get('/api/universal-settings', (req, res) => {
