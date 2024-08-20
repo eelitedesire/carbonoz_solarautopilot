@@ -190,14 +190,6 @@ nav li i {
     overflow: hidden;
 }
 
-header {
-    background-color: white;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: sticky;
-    top: 0;
-    z-index: 5;
-}
 
 .main-content {
     flex-grow: 1;
@@ -213,12 +205,6 @@ header {
     min-height: 100%;
 }
 
-footer {
-    background-color: var(--primary-color);
-    color: white;
-    text-align: center;
-    padding: 10px;
-}
 
 @media (max-width: 768px) {
     .container {
@@ -488,6 +474,59 @@ footer {
     min-height: 12em;
   }
 }
+.flex-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.battery-info {
+    flex: 0 0 300px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.battery-info h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: var(--text-color);
+}
+
+.battery-info table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.battery-info td {
+    padding: 8px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.battery-info td:first-child {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.battery-info td:last-child {
+    text-align: right;
+}
+
+@media (max-width: 768px) {
+    .flex-container {
+        flex-direction: column;
+    }
+    
+    .card-section.gauges {
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+    
+    .battery-info {
+        flex: none;
+        width: 100%;
+    }
+}
    </style>
    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -502,9 +541,6 @@ footer {
             <div class="logo">
               <div class="logo-icon"><img src="https://carbonoz.com/assets/images/image04.jpg?v=8b5d1d9b" width="45px" alt=""></div>
                 <span class="logo-text">Carbonoz <span class="highlight">SolarAutopilot</span></span>
-            </div>
-            <div class="search">
-                <input type="text" placeholder="Search...">
             </div>
             <nav>
               <ul>
@@ -524,88 +560,87 @@ footer {
             </div>
         </div>
 
-        <div class="main-container">
-            <header>
-                <h1>Dashboard</h1>
-            </header>
 
             <div class="main-content">
                 <div class="content-card">
-              
-                  <div class="card-section gauges no-padding flex" id="gaugeSection">
-                    <div class="half">
-                        <div class="gauge" data-type="loadPower">
-                            <div class="mask">
-                                <div class="semi-circle blue"></div>
-                                <div class="semi-circle--mask"></div>
+                    <div class="flex-container">
+                      <div class="card-section gauges no-padding flex" id="gaugeSection">
+                        <div class="half">
+                            <div class="gauge" data-type="loadPower">
+                                <div class="mask">
+                                    <div class="semi-circle blue"></div>
+                                    <div class="semi-circle--mask"></div>
+                                </div>
+                                <div class="value"></div>
+                                <div class="label">Load</div>
                             </div>
-                            <div class="value"></div>
-                            <div class="label">Load</div>
                         </div>
-                    </div>
-                    <div class="half">
-                        <div class="gauge" data-type="solarProduction">
-                            <div class="mask">
-                                <div class="semi-circle yellow"></div>
-                                <div class="semi-circle--mask"></div>
+                        <div class="half">
+                            <div class="gauge" data-type="solarProduction">
+                                <div class="mask">
+                                    <div class="semi-circle yellow"></div>
+                                    <div class="semi-circle--mask"></div>
+                                </div>
+                                <div class="value"></div>
+                                <div class="label">Solar PV</div>
                             </div>
-                            <div class="value"></div>
-                            <div class="label">Solar PV</div>
                         </div>
-                    </div>
-                    <div class="half">
-                        <div class="gauge" data-type="gridVoltage">
-                            <div class="mask">
-                                <div class="semi-circle yellow"></div>
-                                <div class="semi-circle--mask"></div>
+                        <div class="half">
+                            <div class="gauge" data-type="gridVoltage">
+                                <div class="mask">
+                                    <div class="semi-circle yellow"></div>
+                                    <div class="semi-circle--mask"></div>
+                                </div>
+                                <div class="value"></div>
+                                <div class="label">Grid V</div>
                             </div>
-                            <div class="value"></div>
-                            <div class="label">Grid V</div>
                         </div>
-                    </div>
-                    <div class="half">
-                        <div class="gauge" data-type="gridImport">
-                            <div class="mask">
-                                <div class="semi-circle red"></div>
-                                <div class="semi-circle--mask"></div>
+                        <div class="half">
+                            <div class="gauge" data-type="gridImport">
+                                <div class="mask">
+                                    <div class="semi-circle red"></div>
+                                    <div class="semi-circle--mask"></div>
+                                </div>
+                                <div class="value"></div>
+                                <div class="label">Grid</div>
                             </div>
-                            <div class="value"></div>
-                            <div class="label">Grid</div>
                         </div>
-                    </div>
-                    <div class="half">
-                        <div class="gauge" data-type="batteryStateOfCharge">
-                            <div class="mask">
-                                <div class="semi-circle green"></div>
-                                <div class="semi-circle--mask"></div>
+                        <div class="half">
+                            <div class="gauge" data-type="BatteryPower">
+                                <div class="mask">
+                                    <div class="semi-circle green"></div>
+                                    <div class="semi-circle--mask"></div>
+                                </div>
+                                <div class="value"></div>
+                                <div class="label">Battery</div>
                             </div>
-                            <div class="value"></div>
-                            <div class="label">Battery (SoC)</div>
                         </div>
-                    </div>
-                    <div class="half">
-                        <div class="gauge" data-type="BatteryPower">
-                            <div class="mask">
-                                <div class="semi-circle green"></div>
-                                <div class="semi-circle--mask"></div>
-                            </div>
-                            <div class="value"></div>
-                            <div class="label">Battery</div>
-                        </div>
+    
+                        <div class="half">
+                          <div class="gauge" data-type="BatteryVoltage">
+                              <div class="mask">
+                                  <div class="semi-circle aqua"></div>
+                                  <div class="semi-circle--mask"></div>
+                              </div>
+                              <div class="value"></div>
+                              <div class="label">Battery V</div>
+                          </div>
+                      </div>
                     </div>
 
-                    <div class="half">
-                      <div class="gauge" data-type="BatteryVoltage">
-                          <div class="mask">
-                              <div class="semi-circle aqua"></div>
-                              <div class="semi-circle--mask"></div>
-                          </div>
-                          <div class="value"></div>
-                          <div class="label">Battery V</div>
-                      </div>
+                    <div class="battery-info">
+                      <h2>Battery Information</h2>
+                      <table>
+                          <tr><td>Power</td><td>0 W</td></tr>
+                          <tr><td>Current</td><td>0 A</td></tr>
+                          <tr><td>Voltage</td><td>0 V</td></tr>
+                          <tr><td>Temperature</td><td>0 °C</td></tr>
+                          <tr><td>Temperature MOS</td><td>0 °C</td></tr>
+                          <tr><td>Temperature ENV</td><td>0 °C</td></tr>
+                      </table>
                   </div>
+                  
                 </div>
-                
                     <div class="dashboard-column">
                         <div class="card">
                             <iframe src="http://<%= mqtt_host %>:3000/d-solo/solar_dashboard?orgId=1&refresh=1m&panelId=2&theme=light" class="iframe-overview" scrolling="no"
@@ -633,47 +668,39 @@ footer {
                 </div>
             </div>
 
-            <footer>
-                <p>&copy; 2024 Carbonoz SolarAutopilot. All rights reserved.</p>
-            </footer>
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <script>
-  function updateGauges() {
+     function updateGauges() {
     fetch('<%= ingress_path %>/api/realtime-data')
         .then(response => response.json())
         .then(data => {
+            // Update gauges
             updateGauge('loadPower', data.loadPower.value, 10000, 'W');
             updateGauge('solarProduction', data.solarProduction.value, 10000, 'W');
             updateGauge('gridVoltage', data.gridVoltage.value, 500, 'V');
-            updateGauge('gridImport', data.gridImport.value, 10000, 'W'); // gridImport can have negative values
-            updateGauge('batteryStateOfCharge', data.batteryStateOfCharge.value, 100, '%');
-            updateGauge('BatteryPower', data.BatteryPower.value, 10000, 'W'); // BatteryPower can have negative values
+            updateGauge('gridImport', data.gridImport.value, 10000, 'W');
+            updateGauge('BatteryPower', data.BatteryPower.value, 10000, 'W');
             updateGauge('BatteryVoltage', data.BatteryVoltage.value, 100, 'V');
+
+            // Update battery information
+            updateBatteryInfo(data.BatteryPower.value, data.BatteryCurrent.value, data.BatteryVoltage.value, 
+                              data.BatteryTemperature.value, data.BatteryTemperatureMos.value, data.BatteryTemperatureEnv.value);
         })
         .catch(error => console.error('Error fetching real-time data:', error));
 }
 
-function updateGauge(type, value, maxValue, unit) {
-    const gauge = document.querySelector(`.gauge[data-type="${type}"]`);
-    if (!gauge) return;
+function updateBatteryInfo(power, current, voltage, temperature, temperatureMos, temperatureEnv) {
+    const batteryInfoTable = document.querySelector('.battery-info table');
 
-    const mask = gauge.querySelector('.semi-circle--mask');
-    const valueElement = gauge.querySelector('.value');
-
-    value = Number(value);
-    if (isNaN(value)) value = 0;
-
-    // Adjust range to handle negative values
-    const minValue = type === 'BatteryPower' || type === 'gridImport' ? -maxValue : 0;
-    value = Math.max(minValue, Math.min(value, maxValue));
-
-    // Adjust rotation to handle negative values
-    const rotation = ((value - minValue) / (maxValue - minValue)) * 180;
-
-    mask.style.transform = `rotate(${rotation}deg)`;
-    valueElement.textContent = `${value} ${unit}`;
+    // Update each row with real-time data
+    batteryInfoTable.rows[0].cells[1].textContent = `${power} W`;
+    batteryInfoTable.rows[1].cells[1].textContent = `${current} A`;
+    batteryInfoTable.rows[2].cells[1].textContent = `${voltage} V`;
+    batteryInfoTable.rows[3].cells[1].textContent = `${temperature} °C`;
+    batteryInfoTable.rows[4].cells[1].textContent = `${temperatureMos} °C`;
+    batteryInfoTable.rows[5].cells[1].textContent = `${temperatureEnv} °C`;
 }
 
 // Update gauges every 5 seconds
@@ -682,7 +709,8 @@ setInterval(updateGauges, 5000);
 // Initial update
 document.addEventListener('DOMContentLoaded', updateGauges);
 
-  </script>
+    
+      </script>
   
     
        
