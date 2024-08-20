@@ -485,39 +485,34 @@ app.get('/analytics', async (req, res) => {
   }
 })
 
+
 app.get('/', async (req, res) => {
   try {
-    const loadPower = await getCurrentData(
-      'solar_assistant_DEYE/total/load_power/state'
-    )
-    const solarProduction = await getCurrentData(
-      'solar_assistant_DEYE/total/pv_power/state'
-    )
-    const batteryStateOfCharge = await getCurrentData(
-      'solar_assistant_DEYE/total/battery_state_of_charge/state'
-    )
-    const gridImport = await getCurrentData(
-      'solar_assistant_DEYE/total/grid_power/state'
-    )
-    const gridVoltage = await getCurrentData(
-      'solar_assistant_DEYE/total/grid_voltage/state'
-    )
-    const BatteryPower = await getCurrentData(
-      'solar_assistant_DEYE/total/battery_power/state'
-    )
-    const BatteryVoltage = await getCurrentData(
-      'solar_assistant_DEYE/battery_1/voltage/state'
-    )
+    const loadPower = await getCurrentData('solar_assistant_DEYE/total/load_power/state');
+        const solarProduction = await getCurrentData('solar_assistant_DEYE/total/pv_power/state');
+        const batteryStateOfCharge = await getCurrentData('solar_assistant_DEYE/total/battery_state_of_charge/state');
+        const gridImport = await getCurrentData('solar_assistant_DEYE/total/grid_power/state');
+        const gridVoltage = await getCurrentData('solar_assistant_DEYE/total/grid_voltage/state');
+        const BatteryPower = await getCurrentData('solar_assistant_DEYE/total/battery_power/state');
+        const BatteryVoltage = await getCurrentData('solar_assistant_DEYE/battery_1/voltage/state');  
+        const BatteryCurrent = await getCurrentData('solar_assistant_DEYE/battery_1/power/state');  
+        const BatteryTemperature = await getCurrentData('solar_assistant_DEYE/battery_1/temperature/state');  
+        const BatteryTemperatureMos = await getCurrentData('solar_assistant_DEYE/battery_1/temperature_mos/state'); 
+        const BatteryTemperatureEnv = await getCurrentData('solar_assistant_DEYE/battery_1/temperature_env/state'); 
 
-    const data = {
-      loadPower,
-      solarProduction,
-      batteryStateOfCharge,
-      gridImport,
-      gridVoltage,
-      BatteryPower,
-      BatteryVoltage,
-    }
+        const data = {
+          loadPower,
+          solarProduction,
+          batteryStateOfCharge,
+          gridImport,
+          gridVoltage,
+          BatteryPower,
+          BatteryVoltage, 
+          BatteryCurrent,
+          BatteryTemperature,
+          BatteryTemperatureMos,
+          BatteryTemperatureEnv  
+        };
 
     res.render('energy-dashboard', {
       data,
@@ -532,37 +527,32 @@ app.get('/', async (req, res) => {
 
 app.get('/api/realtime-data', async (req, res) => {
   try {
-    const loadPower = await getCurrentData(
-      'solar_assistant_DEYE/total/load_power/state'
-    )
-    const solarProduction = await getCurrentData(
-      'solar_assistant_DEYE/total/pv_power/state'
-    )
-    const batteryStateOfCharge = await getCurrentData(
-      'solar_assistant_DEYE/total/battery_state_of_charge/state'
-    )
-    const gridImport = await getCurrentData(
-      'solar_assistant_DEYE/total/grid_power/state'
-    )
-    const gridVoltage = await getCurrentData(
-      'solar_assistant_DEYE/total/grid_voltage/state'
-    )
-    const BatteryPower = await getCurrentData(
-      'solar_assistant_DEYE/total/battery_power/state'
-    )
-    const BatteryVoltage = await getCurrentData(
-      'solar_assistant_DEYE/battery_1/voltage/state'
-    ) // New BatteryVoltage data
+    const loadPower = await getCurrentData('solar_assistant_DEYE/total/load_power/state');
+        const solarProduction = await getCurrentData('solar_assistant_DEYE/total/pv_power/state');
+        const batteryStateOfCharge = await getCurrentData('solar_assistant_DEYE/total/battery_state_of_charge/state');
+        const gridImport = await getCurrentData('solar_assistant_DEYE/total/grid_power/state');
+        const gridVoltage = await getCurrentData('solar_assistant_DEYE/total/grid_voltage/state');
+        const BatteryPower = await getCurrentData('solar_assistant_DEYE/total/battery_power/state');
+        const BatteryVoltage = await getCurrentData('solar_assistant_DEYE/battery_1/voltage/state'); 
+        const BatteryCurrent = await getCurrentData('solar_assistant_DEYE/battery_1/power/state');  
+        const BatteryTemperature = await getCurrentData('solar_assistant_DEYE/battery_1/temperature/state');  
+        const BatteryTemperatureMos = await getCurrentData('solar_assistant_DEYE/battery_1/temperature_mos/state'); 
+        const BatteryTemperatureEnv = await getCurrentData('solar_assistant_DEYE/battery_1/temperature_env/state'); 
 
-    const data = {
-      loadPower,
-      solarProduction,
-      batteryStateOfCharge,
-      gridImport,
-      gridVoltage,
-      BatteryPower,
-      BatteryVoltage, // Include BatteryVoltage in the data
-    }
+        const data = {
+            loadPower,
+            solarProduction,
+            batteryStateOfCharge,
+            gridImport,
+            gridVoltage,
+            BatteryPower,
+            BatteryVoltage,
+            BatteryCurrent,
+            BatteryTemperature,
+            BatteryTemperatureMos,
+            BatteryTemperatureEnv 
+            
+        };
 
     res.json(data)
   } catch (error) {
@@ -570,6 +560,7 @@ app.get('/api/realtime-data', async (req, res) => {
     res.status(500).json({ error: 'Error fetching real-time data' })
   }
 })
+
 
 // Universal Settings
 app.get('/api/universal-settings', (req, res) => {
