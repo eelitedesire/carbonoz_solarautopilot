@@ -503,9 +503,7 @@ footer {
               <div class="logo-icon"><img src="https://carbonoz.com/assets/images/image04.jpg?v=8b5d1d9b" width="45px" alt=""></div>
                 <span class="logo-text">Carbonoz <span class="highlight">SolarAutopilot</span></span>
             </div>
-            <div class="search">
-                <input type="text" placeholder="Search...">
-            </div>
+
             <nav>
               <ul>
                 <li><a href="<%= ingress_path %>/"><i>🏠</i><span>Dashboard</span></a></li>
@@ -525,9 +523,6 @@ footer {
         </div>
 
         <div class="main-container">
-            <header>
-                <h1>Dashboard</h1>
-            </header>
 
             <div class="main-content">
                 <div class="content-card">
@@ -574,16 +569,6 @@ footer {
                         </div>
                     </div>
                     <div class="half">
-                        <div class="gauge" data-type="batteryStateOfCharge">
-                            <div class="mask">
-                                <div class="semi-circle green"></div>
-                                <div class="semi-circle--mask"></div>
-                            </div>
-                            <div class="value"></div>
-                            <div class="label">Battery (SoC)</div>
-                        </div>
-                    </div>
-                    <div class="half">
                         <div class="gauge" data-type="BatteryPower">
                             <div class="mask">
                                 <div class="semi-circle green"></div>
@@ -616,12 +601,15 @@ footer {
                 
                     <div class="dashboard-column">
                         <div class="card column-4">
-                            <iframe src="http://<%= mqtt_host %>:3000/d-solo/solar_dashboard?orgId=1&refresh=1m&panelId=217&theme=light" class="iframe-battery-power"
+                            <iframe src="http://<%= mqtt_host %>:3000/d-solo/solar_dashboard?orgId=1&refresh=1m&panelId=229&theme=light" class="iframe-battery-power"
                                     scrolling="no" frameborder="0">
                             </iframe>
                             <iframe src="http://<%= mqtt_host %>:3000/d-solo/solar_dashboard??orgId=1&refresh=1m&panelId=139&theme=light" class="iframe-battery-soc"
                                     scrolling="no" frameborder="0">
                             </iframe>
+                            <iframe src="http://<%= mqtt_host %>:3000/d-solo/solar_dashboard??orgId=1&refresh=1m&panelId=231&theme=light" class="iframe-battery-soc"
+                              scrolling="no" frameborder="0">
+                      </iframe>
                         </div>
                     </div>
 
@@ -633,9 +621,7 @@ footer {
                 </div>
             </div>
 
-            <footer>
-                <p>&copy; 2024 Carbonoz SolarAutopilot. All rights reserved.</p>
-            </footer>
+        
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
@@ -648,7 +634,6 @@ footer {
             updateGauge('solarProduction', data.solarProduction.value, 10000, 'W');
             updateGauge('gridVoltage', data.gridVoltage.value, 500, 'V');
             updateGauge('gridImport', data.gridImport.value, 10000, 'W'); // gridImport can have negative values
-            updateGauge('batteryStateOfCharge', data.batteryStateOfCharge.value, 100, '%');
             updateGauge('BatteryPower', data.BatteryPower.value, 10000, 'W'); // BatteryPower can have negative values
             updateGauge('BatteryVoltage', data.BatteryVoltage.value, 100, 'V');
         })
