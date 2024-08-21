@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 3,
+  "id": 2,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -177,6 +177,7 @@
       "pluginVersion": "11.1.4",
       "targets": [
         {
+          "alias": "Load percentage",
           "datasource": "InfluxDB",
           "groupBy": [
             {
@@ -195,7 +196,7 @@
           "measurement": "mqtt_consumer",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT MEAN(\"value\") AS \"\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/inverter_1/load_percentage/state' GROUP BY time($__interval) fill(null)",
+          "query": "SELECT last(\"value\") AS \"\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/inverter_1/load_percentage/state' GROUP BY time($__interval) fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -222,38 +223,10 @@
       "datasource": "InfluxDB",
       "fieldConfig": {
         "defaults": {
-          "mappings": [
-            {
-              "options": {
-                "from": -5,
-                "result": {
-                  "text": "Netzregelung"
-                },
-                "to": 5
-              },
-              "type": "range"
-            },
-            {
-              "options": {
-                "from": -9999999999,
-                "result": {
-                  "text": "Entladen"
-                },
-                "to": -5
-              },
-              "type": "range"
-            },
-            {
-              "options": {
-                "from": 5,
-                "result": {
-                  "text": "Laden"
-                },
-                "to": 9999999999
-              },
-              "type": "range"
-            }
-          ],
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -270,7 +243,8 @@
                 "value": 5
               }
             ]
-          }
+          },
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -289,14 +263,13 @@
         "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
-            "last"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
         },
         "showPercentChange": false,
-        "text": {},
-        "textMode": "value",
+        "textMode": "auto",
         "wideLayout": true
       },
       "pluginVersion": "11.1.4",
@@ -320,7 +293,7 @@
           "measurement": "mqtt_consumer",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT MEAN(\"value\") AS \"Inverter 2\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/inverter_2/load_percentage/state' GROUP BY time($__interval) fill(null)",
+          "query": "",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -338,9 +311,21 @@
               }
             ]
           ]
+        },
+        {
+          "alias": "Load percentage 1",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "advhmea8kjn5sf"
+          },
+          "hide": false,
+          "query": "SELECT last(\"value\") AS \"Inverter 2\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/inverter_2/load_percentage/state' GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series"
         }
       ],
-      "title": "Load percentage 1",
+      "title": "Load percentage 2",
       "type": "stat"
     },
     {
@@ -364,7 +349,7 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 4,
+        "w": 8,
         "x": 12,
         "y": 1
       },
@@ -429,249 +414,6 @@
         }
       ],
       "title": "Pv Voltage 2",
-      "type": "stat"
-    },
-    {
-      "datasource": "InfluxDB",
-      "fieldConfig": {
-        "defaults": {
-          "decimals": 2,
-          "mappings": [],
-          "max": 100,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 50
-              },
-              {
-                "color": "green",
-                "value": 100
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 16,
-        "y": 1
-      },
-      "hideTimeOverride": true,
-      "id": 92,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "text": {},
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.1.4",
-      "targets": [
-        {
-          "alias": "A",
-          "datasource": "InfluxDB",
-          "groupBy": [
-            {
-              "params": [
-                "30m"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "0"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "solcast",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT SUM(\"value\") AS \"TotalEnergyGenerated\"\nFROM \"state\"\nWHERE \"topic\" = 'solar_assistant_DEYE/total/pv_energy/state'\n  AND $timeFilter\n",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              },
-              {
-                "params": [
-                  " / 2"
-                ],
-                "type": "math"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "topic",
-              "operator": "=",
-              "value": "pv_estimate"
-            }
-          ]
-        },
-        {
-          "datasource": "InfluxDB",
-          "hide": false,
-          "query": "SELECT SUM(\"value\") AS \"TotalEnergyConsumed\"\nFROM \"state\"\nWHERE \"topic\" = 'solar_assistant_DEYE/total/load_energy/state'\n  AND $timeFilter\n",
-          "rawQuery": true,
-          "refId": "B",
-          "resultFormat": "time_series"
-        }
-      ],
-      "title": "Degree of Self-Sufficiency",
-      "type": "stat"
-    },
-    {
-      "datasource": "InfluxDB",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "decimals": 2,
-          "mappings": [],
-          "max": 100,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 50
-              },
-              {
-                "color": "green",
-                "value": 100
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 18,
-        "y": 1
-      },
-      "hideTimeOverride": true,
-      "id": 221,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "text": {},
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.1.4",
-      "targets": [
-        {
-          "alias": "A",
-          "datasource": "InfluxDB",
-          "groupBy": [
-            {
-              "params": [
-                "30m"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "0"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "solcast",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT SUM(\"value\") AS \"TotalEnergyGenerated\"\nFROM \"state\"\nWHERE \"topic\" = 'solar_assistant_DEYE/total/pv_energy/state'\n  AND $timeFilter\n",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              },
-              {
-                "params": [
-                  " / 2"
-                ],
-                "type": "math"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "topic",
-              "operator": "=",
-              "value": "pv_estimate"
-            }
-          ]
-        },
-        {
-          "datasource": "InfluxDB",
-          "hide": false,
-          "query": "SELECT SUM(\"value\") AS \"EnergyConsumedOnSite\"\nFROM \"state\"\nWHERE \"topic\" = 'solar_assistant_DEYE/total/load_energy/state'\n  AND $timeFilter\n",
-          "rawQuery": true,
-          "refId": "B",
-          "resultFormat": "time_series"
-        }
-      ],
-      "title": " Degree of Self-Consumption",
       "type": "stat"
     },
     {
@@ -766,15 +508,25 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "continuous-RdYlGr"
           },
           "mappings": [],
+          "max": 100,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 60
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 80
               }
             ]
           },
@@ -790,11 +542,12 @@
       },
       "id": 209,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
+        "displayMode": "lcd",
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "vertical",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -802,10 +555,9 @@
           "fields": "",
           "values": false
         },
-        "showPercentChange": false,
-        "text": {},
-        "textMode": "auto",
-        "wideLayout": true
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
       },
       "pluginVersion": "11.1.4",
       "targets": [
@@ -818,7 +570,7 @@
         }
       ],
       "title": "Battery Current",
-      "type": "stat"
+      "type": "bargauge"
     },
     {
       "datasource": "InfluxDB",
@@ -1976,7 +1728,7 @@
       },
       "id": 118,
       "panels": [],
-      "title": "PV",
+      "title": "MPPT 1 & 2",
       "type": "row"
     },
     {
@@ -2720,7 +2472,7 @@
       },
       "id": 124,
       "panels": [],
-      "title": "Hausverbrauch",
+      "title": "MPPT Current",
       "type": "row"
     },
     {
@@ -2767,7 +2519,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -2919,7 +2672,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -3292,7 +3046,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "transparent"
+                "color": "transparent",
+                "value": null
               },
               {
                 "color": "red",
@@ -3555,7 +3310,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -3767,167 +3523,50 @@
       "type": "timeseries"
     },
     {
-      "datasource": {},
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "hue",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineStyle": {
-              "fill": "solid"
-            },
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "area"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red"
-              },
-              {
-                "color": "transparent",
-                "value": 0
-              },
-              {
-                "color": "green",
-                "value": 1
-              }
-            ]
-          },
-          "unit": " Watts"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 85
-      },
-      "id": 217,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "8.4.3",
-      "targets": [
-        {
-          "datasource": "InfluxDB",
-          "query": "SELECT MEAN(\"value\") AS \"Battery power\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/total/battery_power/state' GROUP BY time($__interval) fill(null)",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series"
-        }
-      ],
-      "title": "Battery power",
-      "type": "timeseries"
-    },
-    {
       "collapsed": false,
       "datasource": "InfluxDB",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 93
+        "y": 85
       },
       "id": 4,
       "panels": [],
       "repeat": "topicsEvuCurrent",
       "repeatDirection": "h",
-      "title": "grid",
+      "title": "Battery ,Grid and AC",
       "type": "row"
     },
     {
-      "datasource": "InfluxDB",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "advhmea8kjn5sf"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "bars",
-            "fillOpacity": 100,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
+            "mode": "continuous-RdYlGr"
           },
           "decimals": 1,
           "links": [],
           "mappings": [],
+          "max": 100,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
                 "value": 80
+              },
+              {
+                "color": "#EAB839",
+                "value": 90
               }
             ]
           },
@@ -3961,10 +3600,6 @@
                   "fixedColor": "rgb(90, 90, 90)",
                   "mode": "fixed"
                 }
-              },
-              {
-                "id": "custom.transform",
-                "value": "negative-Y"
               }
             ]
           }
@@ -3974,27 +3609,29 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 94
+        "y": 86
       },
       "id": 116,
       "interval": "",
       "options": {
-        "legend": {
+        "displayMode": "lcd",
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "vertical",
+        "reduceOptions": {
           "calcs": [
-            "mean",
-            "max",
-            "min"
+            "lastNotNull"
           ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "none"
-        }
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
       },
-      "pluginVersion": "8.4.3",
+      "pluginVersion": "11.1.4",
       "targets": [
         {
           "alias": "Total",
@@ -4016,7 +3653,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT MEAN(\"value\") AS \"Total\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/total/battery_current/state' GROUP BY time($__interval) fill(null)\n",
+          "query": "SELECT last(\"value\") AS \"Total\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/total/battery_current/state' GROUP BY time($__interval) fill(null)\n",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -4055,7 +3692,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "\nSELECT MEAN(\"value\") AS \"Inverter 1\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/inverter_1/battery_current/state' GROUP BY time($__interval) fill(null)",
+          "query": "\nSELECT last(\"value\") AS \"Inverter 1\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/inverter_1/battery_current/state' GROUP BY time($__interval) fill(null)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
@@ -4078,14 +3715,14 @@
           "alias": "Inverter 2",
           "datasource": "InfluxDB",
           "hide": false,
-          "query": "SELECT MEAN(\"value\") AS \"Inverter 1\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/inverter_2/battery_current/state' GROUP BY time($__interval) fill(null)",
+          "query": "SELECT last(\"value\") AS \"Inverter 1\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/inverter_2/battery_current/state' GROUP BY time($__interval) fill(null)",
           "rawQuery": true,
           "refId": "C",
           "resultFormat": "time_series"
         }
       ],
       "title": "Battery current",
-      "type": "timeseries"
+      "type": "bargauge"
     },
     {
       "datasource": "InfluxDB",
@@ -4133,7 +3770,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -4162,7 +3800,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 102
+        "y": 94
       },
       "id": 5,
       "interval": "",
@@ -4316,7 +3954,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -4345,7 +3984,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 102
+        "y": 94
       },
       "id": 228,
       "interval": "",
@@ -4499,7 +4138,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -4528,7 +4168,7 @@
         "h": 9,
         "w": 8,
         "x": 16,
-        "y": 102
+        "y": 94
       },
       "id": 223,
       "interval": "",
@@ -4683,11 +4323,11 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 111
+        "y": 103
       },
       "id": 130,
       "panels": [],
-      "title": "self-consumption rate and degree of self-sufficiency",
+      "title": "Batttery (SoC)",
       "type": "row"
     },
     {
@@ -4735,7 +4375,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -4751,7 +4392,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 112
+        "y": 104
       },
       "id": 139,
       "options": {
@@ -4905,11 +4546,11 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 120
+        "y": 112
       },
       "id": 128,
       "panels": [],
-      "title": "savings and revenue calculator",
+      "title": "Power",
       "type": "row"
     },
     {
@@ -4922,7 +4563,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "light-green"
+                "color": "light-green",
+                "value": null
               }
             ]
           },
@@ -4934,7 +4576,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 121
+        "y": 113
       },
       "id": 141,
       "options": {
@@ -4989,7 +4631,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -5001,7 +4644,7 @@
         "h": 4,
         "w": 6,
         "x": 6,
-        "y": 121
+        "y": 113
       },
       "id": 143,
       "options": {
@@ -5064,7 +4707,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -5076,7 +4720,7 @@
         "h": 4,
         "w": 6,
         "x": 12,
-        "y": 121
+        "y": 113
       },
       "id": 142,
       "options": {
@@ -5140,11 +4784,12 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red"
+                "color": "red",
+                "value": null
               }
             ]
           },
-          "unit": "€"
+          "unit": "Watts"
         },
         "overrides": []
       },
@@ -5152,7 +4797,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 121
+        "y": 113
       },
       "id": 205,
       "options": {
@@ -5189,7 +4834,7 @@
       "type": "stat"
     },
     {
-      "datasource": "InfluxDB",
+      "datasource": {},
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -5234,7 +4879,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -5306,6 +4952,36 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Total"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Inverter 1"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "semi-dark-yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
           }
         ]
       },
@@ -5313,7 +4989,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 125
+        "y": 117
       },
       "id": 145,
       "options": {
@@ -5503,11 +5179,11 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 133
+        "y": 125
       },
       "id": 227,
       "panels": [],
-      "title": "System Status",
+      "title": "Battery and Inverter Templerature",
       "type": "row"
     },
     {
@@ -5515,18 +5191,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-GrYlRd"
-          },
-          "custom": {
-            "fillOpacity": 70,
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineWidth": 0,
-            "spanNulls": false
+            "mode": "palette-classic"
           },
           "mappings": [
             {
@@ -5555,14 +5220,16 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "Degrees Celsius"
         },
         "overrides": []
       },
@@ -5570,28 +5237,31 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 134
+        "y": 126
       },
-      "id": 225,
+      "id": 231,
       "options": {
-        "alignValue": "left",
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
+        "displayMode": "lcd",
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
         },
-        "mergeValues": true,
-        "rowHeight": 0.9,
-        "showValue": "auto",
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
       },
-      "pluginVersion": "9.1.7",
+      "pluginVersion": "11.1.4",
       "targets": [
         {
-          "alias": "Inverter 1",
+          "alias": "Battery Temperature",
           "datasource": "InfluxDB",
           "groupBy": [
             {
@@ -5610,7 +5280,7 @@
           "hide": false,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT MEAN(\"value\") AS \"Pv Current\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/inverter_1/pv_current_2/state' GROUP BY time($__interval) fill(null)",
+          "query": "SELECT MEAN(\"value\") AS \"Battery Temperature\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/battery_1/temperature/state' GROUP BY time($__interval) fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -5631,17 +5301,166 @@
           "tags": []
         },
         {
-          "alias": "Inverter 2",
+          "alias": "Battery Temperature Mos",
           "datasource": "InfluxDB",
           "hide": false,
-          "query": "SELECT MEAN(\"value\") AS \"Pv Current\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/inverter_2/pv_current_2/state' GROUP BY time($__interval) fill(null)",
+          "query": "SELECT MEAN(\"value\") AS \"Pv Current\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/battery_1/temperature_mos/state' GROUP BY time($__interval) fill(null)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series"
+        },
+        {
+          "alias": "Battery Temperature Env",
+          "datasource": "InfluxDB",
+          "hide": false,
+          "query": "SELECT MEAN(\"value\") AS \"Pv Current\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/battery_1/temperature_mos/state' GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "C",
+          "resultFormat": "time_series"
         }
       ],
-      "title": "Pv Current",
-      "type": "state-timeline"
+      "title": "Battery Temperature Info",
+      "type": "bargauge"
+    },
+    {
+      "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-RdYlGr"
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 60
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "watt"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 134
+      },
+      "id": 229,
+      "options": {
+        "displayMode": "lcd",
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "vertical",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "11.1.4",
+      "targets": [
+        {
+          "alias": "Battery power",
+          "datasource": "InfluxDB",
+          "query": "SELECT last(\"value\") AS \"Battery power\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/total/battery_power/state' GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series"
+        }
+      ],
+      "title": "Battery power",
+      "type": "bargauge"
+    },
+    {
+      "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-RdYlGr"
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 60
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "watt"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 134
+      },
+      "id": 230,
+      "options": {
+        "displayMode": "lcd",
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "vertical",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "11.1.4",
+      "targets": [
+        {
+          "alias": "Grid Power",
+          "datasource": "InfluxDB",
+          "query": "\nSELECT last(\"value\") AS \"Grid Power\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/total/grid_power/state' GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series"
+        }
+      ],
+      "title": "Grid Power",
+      "type": "bargauge"
     }
   ],
   "refresh": "10s",
@@ -5696,10 +5515,7 @@
           "text": "None",
           "value": ""
         },
-        "datasource": {
-          "type": "influxdb",
-          "uid": "P951FEA4DE68E13C5"
-        },
+        "datasource": "InfluxDB",
         "definition": "select rp from forever.rp_config where time >= now() - ${__from}ms order by time asc limit 1",
         "description": "",
         "hide": 2,
@@ -5760,6 +5576,6 @@
   "timezone": "Indian/Mauritius",
   "title": "Charts",
   "uid": "solar_dashboard",
-  "version": 2,
+  "version": 25,
   "weekStart": ""
 }
