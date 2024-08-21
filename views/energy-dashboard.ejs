@@ -669,8 +669,13 @@ function updateGauge(type, value, maxValue, unit) {
     const minValue = type === 'BatteryPower' || type === 'gridImport' ? -maxValue : 0;
     value = Math.max(minValue, Math.min(value, maxValue));
 
-    // Adjust rotation to handle negative values
-    const rotation = ((value - minValue) / (maxValue - minValue)) * 180;
+    // Calculate the rotation angle based on the value
+    let rotation;
+    if (value >= 0) {
+        rotation = ((value - minValue) / (maxValue - minValue)) * 180;
+    } else {
+        rotation = ((value - minValue) / (maxValue - minValue)) * 180 - 180;
+    }
 
     mask.style.transform = `rotate(${rotation}deg)`;
     valueElement.textContent = `${value} ${unit}`;
