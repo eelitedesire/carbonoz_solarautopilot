@@ -286,6 +286,8 @@ footer {
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
         }
 
         .filter-container {
@@ -298,6 +300,7 @@ footer {
 
         .form-group {
             margin-bottom: 15px;
+
         }
 
         .filter-container label {
@@ -315,12 +318,13 @@ footer {
             border-radius: 4px;
             font-size: 16px;
             box-sizing: border-box;
+         
         }
 
         .filter-container button {
-            width: 100%;
+            margin: 20px;
             background-color: var(--primary-color);
-            color: white;
+            color: #000;
             border: none;
             padding: 12px;
             border-radius: 4px;
@@ -331,7 +335,7 @@ footer {
         }
 
         .filter-container button:hover {
-            background-color: #2980b9;
+            background-color: #cca30f;;
         }
 
         .dashboard-container iframe {
@@ -341,34 +345,7 @@ footer {
             display: block;
         }
 
-        @media (min-width: 768px) {
-            body {
-                padding: 20px;
-            }
-
-            .filter-container {
-                display: flex;
-                flex-wrap: wrap;
-                align-items: flex-end;
-                padding: 20px;
-            }
-
-            .form-group {
-                flex: 1;
-                margin-right: 15px;
-                margin-bottom: 0;
-            }
-
-            .filter-container button {
-                width: auto;
-                padding: 10px 20px;
-                margin-top: 20px;
-            }
-
-            .dashboard-container iframe {
-                height: calc(100vh - 120px);
-            }
-        }
+  
   
   </style>
 </head>
@@ -384,9 +361,7 @@ footer {
             <div class="logo-icon"><img src="https://carbonoz.com/assets/images/image04.jpg?v=8b5d1d9b" width="45px" alt=""></div>
               <span class="logo-text">Carbonoz <span class="highlight">SolarAutopilot</span></span>
           </div>
-            <div class="search">
-                <input type="text" placeholder="Search...">
-            </div>
+          
             <nav>
               <ul>
                 <li><a href="<%= ingress_path %>/"><i>🏠</i><span>Dashboard</span></a></li>
@@ -407,9 +382,7 @@ footer {
        
 
         <div class="main-container">
-            <header>
-                <h1>Dashboard</h1>
-            </header>
+           
 
             <div class="main-content">
                 <div class="content-card">
@@ -450,9 +423,7 @@ footer {
                 </div>
             </div>
 
-            <footer>
-                <p>&copy; 2024 Carbonoz SolarAutopilot. All rights reserved.</p>
-            </footer>
+    
         </div>
     </div>
      
