@@ -52,6 +52,23 @@ let mqttClient
 let incomingMessages = []
 const MAX_MESSAGES = 400
 
+const timezonePath = path.join(__dirname, 'timezone.json');
+
+function getCurrentTimezone() {
+  try {
+    const data = fs.readFileSync(timezonePath, 'utf8');
+    return JSON.parse(data).timezone;
+  } catch (error) {
+    return 'Indian/Mauritius'; // Default timezone
+  }
+}
+
+function setCurrentTimezone(timezone) {
+  fs.writeFileSync(timezonePath, JSON.stringify({ timezone }));
+}
+
+let currentTimezone = getCurrentTimezone();
+
 function connectToMqtt() {
   mqttClient = mqtt.connect(`mqtt://${mqttConfig.host}:${mqttConfig.port}`, {
     username: mqttConfig.username,
@@ -207,7 +224,7 @@ async function getCurrentValue(topic) {
         FROM "state"
         WHERE "topic" = '${topic}'
         AND time >= now() - 2d
-        GROUP BY time(1d) tz('Indian/Mauritius')
+        GROUP BY time(1d) tz('${currentTimezone}')
     `
   try {
     return await influx.query(query)
@@ -241,20 +258,17 @@ async function getCurrentData(topic) {
 // Fetch analytics data from InfluxDB
 async function queryInfluxDB(topic) {
   const query = `
-        SELECT last("value") AS "value"
-        FROM "state"
-        WHERE "topic" = '${topic}'
-        AND time >= now() - 30d
-        GROUP BY time(1d) tz('Indian/Mauritius')
-    `
+      SELECT last("value") AS "value"
+      FROM "state"
+      WHERE "topic" = '${topic}'
+      AND time >= now() - 30d
+      GROUP BY time(1d) tz('${currentTimezone}')
+  `;
   try {
-    return await influx.query(query)
+      return await influx.query(query);
   } catch (error) {
-    console.error(
-      `Error querying InfluxDB for topic ${topic}:`,
-      error.toString()
-    )
-    throw error
+      console.error(`Error querying InfluxDB for topic ${topic}:`, error.toString());
+      throw error;
   }
 }
 
@@ -443,47 +457,28 @@ app.get('/api/energy', async (req, res) => {
 
 app.get('/analytics', async (req, res) => {
   try {
-    const loadPowerData = await queryInfluxDB(
-      'solar_assistant_DEYE/total/load_energy/state'
-    )
-    const pvPowerData = await queryInfluxDB(
-      'solar_assistant_DEYE/total/pv_energy/state'
-    )
-    const batteryStateOfChargeData = await queryInfluxDB(
-      'solar_assistant_DEYE/total/battery_energy_in/state'
-    )
-    const batteryPowerData = await queryInfluxDB(
-      'solar_assistant_DEYE/total/battery_energy_out/state'
-    )
-    const gridPowerData = await queryInfluxDB(
-      'solar_assistant_DEYE/total/grid_energy_in/state'
-    )
-    const gridVoltageData = await queryInfluxDB(
-      'solar_assistant_DEYE/total/grid_energy_out/state'
-    )
+      const loadPowerData = await queryInfluxDB('solar_assistant_DEYE/total/load_energy/state');
+      const pvPowerData = await queryInfluxDB('solar_assistant_DEYE/total/pv_energy/state');
+      const batteryStateOfChargeData = await queryInfluxDB('solar_assistant_DEYE/total/battery_energy_in/state');
+      const batteryPowerData = await queryInfluxDB('solar_assistant_DEYE/total/battery_energy_out/state');
+      const gridPowerData = await queryInfluxDB('solar_assistant_DEYE/total/grid_energy_in/state');
+      const gridVoltageData = await queryInfluxDB('solar_assistant_DEYE/total/grid_energy_out/state');
 
-    const data = {
-      loadPowerData: calculateDailyDifference(loadPowerData),
-      pvPowerData: calculateDailyDifference(pvPowerData),
-      batteryStateOfChargeData: calculateDailyDifference(
-        batteryStateOfChargeData
-      ),
-      batteryPowerData: calculateDailyDifference(batteryPowerData),
-      gridPowerData: calculateDailyDifference(gridPowerData),
-      gridVoltageData: calculateDailyDifference(gridVoltageData),
-    }
+      const data = {
+          loadPowerData,
+          pvPowerData,
+          batteryStateOfChargeData,
+          batteryPowerData,
+          gridPowerData,
+          gridVoltageData,
+      };
 
-    res.render('analytics', {
-      data,
-      ingress_path: process.env.INGRESS_PATH || '',
-    })
+      res.render('analytics', { data, ingress_path: process.env.INGRESS_PATH || '' });
   } catch (error) {
-    console.error('Error fetching analytics data from InfluxDB:', error)
-    res
-      .status(500)
-      .json({ error: 'Error fetching analytics data from InfluxDB' })
+      console.error('Error fetching analytics data from InfluxDB:', error);
+      res.status(500).json({ error: 'Error fetching analytics data from InfluxDB' });
   }
-})
+});
 
 
 app.get('/', async (req, res) => {
@@ -560,6 +555,23 @@ app.get('/api/realtime-data', async (req, res) => {
     res.status(500).json({ error: 'Error fetching real-time data' })
   }
 })
+
+app.get('/api/timezone', (req, res) => {
+  res.json({ timezone: currentTimezone });
+});
+
+app.post('/api/timezone', (req, res) => {
+  const { timezone } = req.body;
+  if (moment.tz.zone(timezone)) {
+    currentTimezone = timezone;
+    setCurrentTimezone(timezone);
+    res.json({ success: true, timezone: currentTimezone });
+  } else {
+    res.status(400).json({ error: 'Invalid timezone' });
+  }
+});
+
+
 
 
 // Universal Settings

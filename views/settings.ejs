@@ -360,6 +360,41 @@ footer {
                 max-height: 200px;
                 overflow-y: auto;
             }
+            .timezone-container {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .timezone-container label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .timezone-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 16px;
+    color: #495057;
+    background-color: #fff;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+
+  .timezone-select:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+  }
+
+  .timezone-select:hover {
+    border-color: #80bdff;
+  }
 
 </style>
 </head>
@@ -400,6 +435,22 @@ footer {
 
             <div class="main-content">
                 <div class="content-card">
+                    <div class="timezone-container">
+                        <label for="timezone">Timezone:</label>
+                        <select id="timezone" class="timezone-select">
+                          <option value="Europe/Berlin">Germany (Berlin)</option>
+                          <option value="Europe/Rome">Italy (Rome)</option>
+                          <option value="America/Cayman">Cayman Islands</option>
+                          <option value="Indian/Mauritius">Mauritius</option>
+                          <option value="Asia/Shanghai">China (Shanghai)</option>
+                          <option value="Europe/London">United Kingdom (London)</option>
+                          <option value="America/New_York">USA (New York)</option>
+                          <option value="Asia/Tokyo">Japan (Tokyo)</option>
+                          <option value="Australia/Sydney">Australia (Sydney)</option>
+                          <option value="Pacific/Auckland">New Zealand (Auckland)</option>
+                        </select>
+                      </div>
+                    
                 
                         <div id="system-state"></div>
                 
@@ -839,6 +890,37 @@ footer {
             };
         });
     </script>
+
+
+<script>
+    const ingressPath = '<%= ingress_path %>';
+  
+  // Fetch current timezone
+  fetch(`${ingressPath}/api/timezone`)
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('timezone').value = data.timezone;
+    });
+
+  // Update timezone when changed
+  document.getElementById('timezone').addEventListener('change', (event) => {
+    fetch(`${ingressPath}/api/timezone`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ timezone: event.target.value }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Timezone updated successfully');
+      } else {
+        alert('Failed to update timezone');
+      }
+    });
+  });
+  </script>
    <script>
     // toggle sidebar
 

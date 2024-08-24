@@ -401,13 +401,38 @@ th, td {
                                 <tbody>
                                     <% for (let i = data.loadPowerData.length - 1; i >= 1 && i >= data.loadPowerData.length - 30; i--) { %>
                                         <tr>
+                                            <!-- Display formatted date -->
                                             <td><%= new Date(data.loadPowerData[i].time).toLocaleDateString('en-GB', { timeZone: 'Indian/Mauritius' }) %></td>
-                                            <td><%= data.pvPowerData[i].difference %> kWh</td>
-                                            <td><%= data.loadPowerData[i].difference %> kWh</td>
-                                            <td><%= data.batteryStateOfChargeData[i].difference %> kWh</td>
-                                            <td><%= data.batteryPowerData[i].difference %> kWh</td>
-                                            <td><%= data.gridPowerData[i].difference %> kWh</td>
-                                            <td><%= data.gridVoltageData[i].difference %> kWh</td>
+                                            
+                                            <% 
+                                                let loadPowerDiff = 0, pvPowerDiff = 0, batteryStateOfChargeDiff = 0, batteryPowerDiff = 0, gridPowerDiff = 0, netPVPowerDiff = 0;
+                                                
+                                                // Ensure data exists and is valid before calculating differences
+                                                if (data.loadPowerData[i-1] && data.loadPowerData[i] && data.loadPowerData[i-1].value !== null && data.loadPowerData[i].value !== null) {
+                                                    loadPowerDiff = data.loadPowerData[i].value >= data.loadPowerData[i-1].value ? (data.loadPowerData[i].value - data.loadPowerData[i-1].value).toFixed(1) : data.loadPowerData[i].value.toFixed(1);
+                                                }
+                                                if (data.pvPowerData[i-1] && data.pvPowerData[i] && data.pvPowerData[i-1].value !== null && data.pvPowerData[i].value !== null) {
+                                                    pvPowerDiff = data.pvPowerData[i].value >= data.pvPowerData[i-1].value ? (data.pvPowerData[i].value - data.pvPowerData[i-1].value).toFixed(1) : data.pvPowerData[i].value.toFixed(1);
+                                                }
+                                                if (data.batteryStateOfChargeData[i-1] && data.batteryStateOfChargeData[i] && data.batteryStateOfChargeData[i-1].value !== null && data.batteryStateOfChargeData[i].value !== null) {
+                                                    batteryStateOfChargeDiff = data.batteryStateOfChargeData[i].value >= data.batteryStateOfChargeData[i-1].value ? (data.batteryStateOfChargeData[i].value - data.batteryStateOfChargeData[i-1].value).toFixed(1) : data.batteryStateOfChargeData[i].value.toFixed(1);
+                                                }
+                                                if (data.batteryPowerData[i-1] && data.batteryPowerData[i] && data.batteryPowerData[i-1].value !== null && data.batteryPowerData[i].value !== null) {
+                                                    batteryPowerDiff = data.batteryPowerData[i].value >= data.batteryPowerData[i-1].value ? (data.batteryPowerData[i].value - data.batteryPowerData[i-1].value).toFixed(1) : data.batteryPowerData[i].value.toFixed(1);
+                                                }
+                                                if (data.gridPowerData[i-1] && data.gridPowerData[i] && data.gridPowerData[i-1].value !== null && data.gridPowerData[i].value !== null) {
+                                                    gridPowerDiff = data.gridPowerData[i].value >= data.gridPowerData[i-1].value ? (data.gridPowerData[i].value - data.gridPowerData[i-1].value).toFixed(1) : data.gridPowerData[i].value.toFixed(1);
+                                                }
+                                                if (data.gridVoltageData[i-1] && data.gridVoltageData[i] && data.gridVoltageData[i-1].value !== null && data.gridVoltageData[i].value !== null) {
+                                                    netPVPowerDiff = data.gridVoltageData[i].value >= data.gridVoltageData[i-1].value ? (data.gridVoltageData[i].value - data.gridVoltageData[i-1].value).toFixed(1) : data.gridVoltageData[i].value.toFixed(1);
+                                                }
+                                            %> 
+                                            <td><%= pvPowerDiff %> kWh</td>
+                                            <td><%= loadPowerDiff %> kWh</td>
+                                            <td><%= batteryStateOfChargeDiff %> kWh</td>
+                                            <td><%= batteryPowerDiff %> kWh</td>
+                                            <td><%= gridPowerDiff %> kWh</td>
+                                            <td><%= netPVPowerDiff %> kWh</td>
                                         </tr>
                                     <% } %>
                                 </tbody>
