@@ -662,15 +662,18 @@ function updateGauge(type, value, maxValue, unit) {
 
     // Calculate the rotation angle based on the value
     let rotation;
-    if (value >= 0) {
-        rotation = ((value - minValue) / (maxValue - minValue)) * 180;
+    if (type === 'BatteryPower' || type === 'gridImport') {
+        // For types that can have negative values
+        rotation = ((value - minValue) / (maxValue - minValue)) * 180 - 90; // Adjust rotation by 90 degrees to center the zero position
     } else {
-        rotation = ((value - minValue) / (maxValue - minValue)) * 180 - 180;
+        // For types that only have positive values
+        rotation = (value / maxValue) * 180;
     }
 
     mask.style.transform = `rotate(${rotation}deg)`;
     valueElement.textContent = `${value} ${unit}`;
 }
+
 
 // Update gauges every 5 seconds
 setInterval(updateGauges, 5000);
