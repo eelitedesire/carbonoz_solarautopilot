@@ -27,6 +27,10 @@ app.set('view engine', 'ejs')
 // Read configuration from Home Assistant add-on options
 const options = JSON.parse(fs.readFileSync('/data/options.json', 'utf8'))
 
+// Extract inverter and battery numbers from options
+const inverterNumber = options.inverter_number || 1;
+const batteryNumber = options.battery_number || 1;
+
 // InfluxDB configuration
 const influxConfig = {
   host: options.mqtt_host,
@@ -51,6 +55,21 @@ const mqttConfig = {
 let mqttClient
 let incomingMessages = []
 const MAX_MESSAGES = 400
+
+// Function to generate category options
+function generateCategoryOptions(inverterNumber, batteryNumber) {
+  const categories = ['all', 'loadPower', 'gridPower', 'pvPower', 'total'];
+  
+  for (let i = 1; i <= inverterNumber; i++) {
+    categories.push(`inverter${i}`);
+  }
+  
+  for (let i = 1; i <= batteryNumber; i++) {
+    categories.push(`battery${i}`);
+  }
+  
+  return categories;
+}
 
 const timezonePath = path.join(__dirname, 'timezone.json');
 
@@ -342,14 +361,19 @@ app.get('/settings', (req, res) => {
 })
 
 app.get('/messages', (req, res) => {
-  res.render('messages', { ingress_path: process.env.INGRESS_PATH || '' })
-})
+  res.render('messages', { 
+    ingress_path: process.env.INGRESS_PATH || '',
+    categoryOptions: generateCategoryOptions(inverterNumber, batteryNumber)
+  });
+});
+
+
 
 app.get('/api/messages', (req, res) => {
-  const categoryFilter = req.query.category
-  const filteredMessages = filterMessagesByCategory(categoryFilter)
-  res.json(filteredMessages)
-})
+  const category = req.query.category;
+  const filteredMessages = filterMessagesByCategory(category);
+  res.json(filteredMessages);
+});
 
 app.get('/chart', (req, res) => {
   res.render('chart', {
@@ -686,40 +710,35 @@ app.post('/api/mqtt', (req, res) => {
   res.sendStatus(200)
 })
 
-// Helper functions
+// Function to filter messages by category
 function filterMessagesByCategory(category) {
-  if (category && category !== 'all') {
-    return incomingMessages.filter((message) => {
-      const keywords = getCategoryKeywords(category)
-      return keywords.some((keyword) => message.includes(keyword))
-    })
+  if (category === 'all') {
+    return incomingMessages;
   }
-  return incomingMessages
-}
 
-function getCategoryKeywords(category) {
-  switch (category) {
-    case 'inverter1':
-      return ['inverter_1']
-    case 'inverter2':
-      return ['inverter_2']
-    case 'loadPower':
-      return ['load_power']
-    case 'gridPower':
-      return ['grid_power']
-    case 'pvPower':
-      return ['pv_power']
-    case 'battery1':
-      return ['battery_1']
-    case 'battery2':
-      return ['battery_2']
-    case 'battery3':
-      return ['battery_3']
-    case 'battery4':
-      return ['battery_4']
-    default:
-      return []
-  }
+  return incomingMessages.filter(message => {
+    const topic = message.split(':')[0];
+    const topicParts = topic.split('/');
+
+    if (category.startsWith('inverter')) {
+      const inverterNum = category.match(/\d+$/)[0];
+      return topicParts[1] === `inverter_${inverterNum}`;
+    }
+
+    if (category.startsWith('battery')) {
+      const batteryNum = category.match(/\d+$/)[0];
+      return topicParts[1] === `battery_${batteryNum}`;
+    }
+
+    const categoryKeywords = {
+      loadPower: ['load_power'],
+      gridPower: ['grid_power'],
+      pvPower: ['pv_power'],
+      total: ['total'],
+    };
+
+    return categoryKeywords[category] ? topicParts.some(part => categoryKeywords[category].includes(part)) : false;
+  });
 }
 
 function publishToMQTT(topic, message) {
