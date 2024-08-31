@@ -27,4 +27,4 @@ cd /usr/src/app
 # Run Prisma to generate client code
 npx prisma generate
 
-exec node --max-old-space-size=128 server.js
+exec node --max-old-space-size=64 server.js

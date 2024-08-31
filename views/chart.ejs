@@ -415,7 +415,7 @@ footer {
                     <div class="dashboard-container">
                         <iframe 
                             id="grafanaDashboard"
-                            src="http://<%= mqtt_host %>:3000/d/solar_dashboard/solar-dashboard?orgId=1&kiosk=1&refresh=1m&theme=light" 
+                            src="http://<%= mqtt_host %>:3001/d/solar_dashboard/solar-dashboard?orgId=1&kiosk=1&refresh=1m&theme=light" 
                             allowfullscreen>
                         </iframe>
                     </div>
@@ -466,7 +466,7 @@ footer {
         if (from && to) {
             const fromUnix = new Date(from).getTime();
             const toUnix = new Date(to).getTime();
-            iframe.src = `http://<%= mqtt_host %>:3000/d/solar_dashboard/solar-dashboard?orgId=1&kiosk=1&refresh=1m&theme=light&from=${fromUnix}&to=${toUnix}&tz=${timezone}`;
+            iframe.src = `http://<%= mqtt_host %>:3001/d/solar_dashboard/solar-dashboard?orgId=1&kiosk=1&refresh=1m&theme=light&from=${fromUnix}&to=${toUnix}&tz=${timezone}`;
         } else {
             alert("Please select both a start and end time.");
         }
