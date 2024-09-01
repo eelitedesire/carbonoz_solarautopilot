@@ -17,10 +17,26 @@ panel_icon: mdi:solar-power
 panel_title: Carbonoz SolarAutopilot
 hassio_api: true
 homeassistant_api: true
+auth_api: true
+host_network: true
 ports:
   3001/tcp: 3001
   6789/tcp: 6789
   7100/tcp: 7100
+ports_description:
+  3001/tcp: Web interface
+  6789/tcp: Main application
+  7100/tcp: WebSocket
+map:
+  - share:rw
+  - ssl
+discovery:
+  - mqtt
+services:
+  - mqtt:need
+mqtt:
+  discovery: true
+  discovery_prefix: homeassistant
 options:
   mqtt_host: ''
   mqtt_port: 1883
