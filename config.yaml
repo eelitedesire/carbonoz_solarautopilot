@@ -3,7 +3,7 @@ version: "1.0.0"
 slug: "carbonoz_solarautopilot"
 description: "CARBONOZ SolarAutopilot for Home Assistant with live Solar dashboard and MQTT inverter control."
 url: "https://github.com/eelitedesire/carbonoz_solarautopilot"
-codenotary: your@email.com  # Replace with your email or remove if not applicable
+codenotary: elitedesire0@gmail.com
 ingress: true
 ingress_port: 6789
 ingress_stream: true
