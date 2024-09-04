@@ -271,167 +271,6 @@ footer {
 
 
 
- 
-
-
-  
-  .card-section.gauges {
-  padding: 0;
-}
-
-.gauge {
-  position: relative;
-  width: 11.5em;
-  margin-left: auto;
-  margin-right: auto;
-  padding-top: 2em;
-  border-radius: 50%;
-  padding-bottom: 2em;
-}
-
-@media only screen and (max-width: 62em) {
-  .gauge {
-    padding-top: 1.5em;
-    padding-bottom: 1.5em;
-  }
-}
-
-.gauge .mask {
-  display: block;
-  position: relative;
-  overflow: hidden;
-  width: 11.5em;
-  height: 5.75em;
-  background: conic-gradient(from 180deg, #4CAF50 0deg 180deg, #FFA500 180deg 270deg, #FF6347 270deg 360deg);
-  border-radius: 100px 100px 0 0;
-  padding-right: 5px;
-}
-
-.gauge .semi-circle {
-  position: relative;
-  display: block;
-  margin: 1px 1px 0;
-  width: calc(11.5em - 2px);
-  height: calc(5.75em - 1px);
-  border-radius: 50% 50% 50% 50% / 100% 100% 0 0;
-}
-
-.gauge .semi-circle.blue {
-  background: linear-gradient(-45deg, #00b7ff, #001aff, #6588e8, #0048ff);
-  background-size: 400% 400%;
-  animation: animated-gradient 5s ease infinite;
-}
-
-.gauge .semi-circle.yellow {
-  background: linear-gradient(-120deg, #fff900, #ffb100, #ffe500, #ffe396);
-  background-size: 400% 400%;
-  animation: animated-gradient 10s ease infinite;
-}
-
-.gauge .semi-circle.red {
-  background: linear-gradient(-75deg, #ffa200, red, #ff664d, red);
-  background-size: 400% 400%;
-  animation: animated-gradient 5s ease infinite;
-}
-
-.gauge .semi-circle.green {
-  background: linear-gradient(120deg, #3bff29, #3e9e00, #00ff0f, #92ff7f);
-  background-size: 400% 400%;
-  animation: animated-gradient 3s ease infinite;
-}
-
-.gauge .semi-circle:before {
-  display: block;
-  position: absolute;
-  bottom: -2px;
-  content: "";
-  left: 50%;
-  z-index: 2;
-  width: 8.5em;
-  height: 4.25em;
-  margin-left: -4.25em;
-  background: #fff;
-  border-radius: 50% 50% 50% 50% / 100% 100% 0 0;
-}
-
-.gauge .semi-circle--mask {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 11.5em;
-  height: 11.5em;
-  background: transparent;
-  transform: rotate(0deg);
-  transform-origin: center center;
-  backface-visibility: hidden;
-  transition: all 0.3s ease-in-out;
-}
-
-.gauge .semi-circle--mask:before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 2;
-  display: block;
-  width: 11.5em;
-  height: 5.75em;
-  background: #efefef;
-  border-radius: 50% 50% 50% 50% / 100% 100% 0 0;
-}
-
-.gauge .value {
-  position: absolute;
-  bottom: 3.5em;
-  width: 11.5em;
-  text-align: center;
-  font-weight: 700;
-  z-index: 3;
-}
-
-@media only screen and (max-width: 62em) {
-  .gauge .value {
-    bottom: 3em;
-  }
-}
-
-.gauge .label {
-  position: absolute;
-  bottom: 2em;
-  width: 11.5em;
-  text-align: center;
-  font-size: 1em;
-  z-index: 3;
-}
-
-@media only screen and (max-width: 62em) {
-  .gauge .label {
-    bottom: 1.5em;
-  }
-}
-
-@keyframes animated-gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.flex {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.half {
-  flex-basis: 50%;
-  
-}
-
 
 
 .dashboard-column {
@@ -454,6 +293,13 @@ footer {
 
 .dashboard-column .card {
   border: 0;
+}
+
+.dashboard-column .card .iframe-moving {
+  display: block;
+  height: 100%;
+  min-height: 39em;
+  width: 100%;
 }
 
 .dashboard-column .card .iframe-overview {
@@ -532,70 +378,13 @@ footer {
 
             <div class="main-content">
                 <div class="content-card">
-              
-                  <div class="card-section gauges no-padding flex" id="gaugeSection">
-                    <div class="half">
-                        <div class="gauge" data-type="loadPower">
-                            <div class="mask">
-                                <div class="semi-circle blue"></div>
-                                <div class="semi-circle--mask"></div>
-                            </div>
-                            <div class="value"></div>
-                            <div class="label">Load</div>
+                    <div class="dashboard-column">
+                        <div class="card">
+                            <iframe src="http://<%= mqtt_host %>:3001/d/solar_power_dashboard/solar_power_dashboard?orgId=1&kiosk=1&refresh=1m&theme=light" class="iframe-moving" scrolling="no"
+                                    frameborder="0">
+                            </iframe>
                         </div>
                     </div>
-                    <div class="half">
-                        <div class="gauge" data-type="solarProduction">
-                            <div class="mask">
-                                <div class="semi-circle yellow"></div>
-                                <div class="semi-circle--mask"></div>
-                            </div>
-                            <div class="value"></div>
-                            <div class="label">Solar PV</div>
-                        </div>
-                    </div>
-                    <div class="half">
-                        <div class="gauge" data-type="gridVoltage">
-                            <div class="mask">
-                                <div class="semi-circle yellow"></div>
-                                <div class="semi-circle--mask"></div>
-                            </div>
-                            <div class="value"></div>
-                            <div class="label">Grid V</div>
-                        </div>
-                    </div>
-                    <div class="half">
-                        <div class="gauge" data-type="gridImport">
-                            <div class="mask">
-                                <div class="semi-circle red"></div>
-                                <div class="semi-circle--mask"></div>
-                            </div>
-                            <div class="value"></div>
-                            <div class="label">Grid</div>
-                        </div>
-                    </div>
-                    <div class="half">
-                        <div class="gauge" data-type="BatteryPower">
-                            <div class="mask">
-                                <div class="semi-circle green"></div>
-                                <div class="semi-circle--mask"></div>
-                            </div>
-                            <div class="value"></div>
-                            <div class="label">Battery</div>
-                        </div>
-                    </div>
-
-                    <div class="half">
-                      <div class="gauge" data-type="BatteryVoltage">
-                          <div class="mask">
-                              <div class="semi-circle aqua"></div>
-                              <div class="semi-circle--mask"></div>
-                          </div>
-                          <div class="value"></div>
-                          <div class="label">Battery V</div>
-                      </div>
-                  </div>
-                </div>
                 
                     <div class="dashboard-column">
                         <div class="card">
@@ -607,9 +396,6 @@ footer {
                 
                     <div class="dashboard-column">
                         <div class="card column-4">
-                            <iframe src="http://<%= mqtt_host %>:3001/d-solo/solar_dashboard?orgId=1&refresh=1m&panelId=229&theme=light" class="iframe-battery-power"
-                                    scrolling="no" frameborder="0">
-                            </iframe>
                             <iframe src="http://<%= mqtt_host %>:3001/d-solo/solar_dashboard??orgId=1&refresh=1m&panelId=139&theme=light" class="iframe-battery-soc"
                                     scrolling="no" frameborder="0">
                             </iframe>
@@ -631,57 +417,7 @@ footer {
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-    <script>
-  function updateGauges() {
-    fetch('<%= ingress_path %>/api/realtime-data')
-        .then(response => response.json())
-        .then(data => {
-            updateGauge('loadPower', data.loadPower.value, 10000, 'W');
-            updateGauge('solarProduction', data.solarProduction.value, 10000, 'W');
-            updateGauge('gridVoltage', data.gridVoltage.value, 500, 'V');
-            updateGauge('gridImport', data.gridImport.value, 10000, 'W'); // gridImport can have negative values
-            updateGauge('BatteryPower', data.BatteryPower.value, 10000, 'W'); // BatteryPower can have negative values
-            updateGauge('BatteryVoltage', data.BatteryVoltage.value, 100, 'V');
-        })
-        .catch(error => console.error('Error fetching real-time data:', error));
-}
-
-function updateGauge(type, value, maxValue, unit) {
-    const gauge = document.querySelector(`.gauge[data-type="${type}"]`);
-    if (!gauge) return;
-
-    const mask = gauge.querySelector('.semi-circle--mask');
-    const valueElement = gauge.querySelector('.value');
-
-    value = Number(value);
-    if (isNaN(value)) value = 0;
-
-    // Adjust range to handle negative values
-    const minValue = type === 'BatteryPower' || type === 'gridImport' ? -maxValue : 0;
-    value = Math.max(minValue, Math.min(value, maxValue));
-
-    // Calculate the rotation angle based on the value
-    let rotation;
-    if (type === 'BatteryPower' || type === 'gridImport') {
-        // For types that can have negative values
-        rotation = ((value - minValue) / (maxValue - minValue)) * 180 - 90; // Adjust rotation by 90 degrees to center the zero position
-    } else {
-        // For types that only have positive values
-        rotation = (value / maxValue) * 180;
-    }
-
-    mask.style.transform = `rotate(${rotation}deg)`;
-    valueElement.textContent = `${value} ${unit}`;
-}
-
-
-// Update gauges every 5 seconds
-setInterval(updateGauges, 5000);
-
-// Initial update
-document.addEventListener('DOMContentLoaded', updateGauges);
-
-  </script>
+ 
   
     
        
