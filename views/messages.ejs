@@ -370,6 +370,73 @@ footer {
 .logo-text .highlight {
     color: #DEAF0B; /* Yellow color for 'SolarAutopilot' */
 }
+
+/* Dark mode styles */
+body.dark-mode {
+    background-color: #2f3640;
+    color: #f5f6fa;
+}
+
+.dark-mode .sidebar {
+    background-color: #2f3640;
+}
+
+.dark-mode .sidebar .logo-icon {
+    background-color: #f5f6fa;
+    color: #2f3640;
+}
+
+.dark-mode .sidebar .logo-text {
+    color: #f5f6fa;
+}
+
+.dark-mode .sidebar nav li {
+    color: #f5f6fa;
+}
+
+.dark-mode .sidebar nav li:hover {
+    background-color: #353b48;
+}
+
+.dark-mode .sidebar nav li a {
+    color: #f5f6fa;
+}
+
+.dark-mode .sidebar nav li i {
+    color: #dcdde1;
+}
+
+.dark-mode .toggle-sidebar,
+.dark-mode .toggle-dark-mode {
+    color: #f5f6fa;
+}
+
+.dark-mode .toggle-switch {
+    background-color: #353b48;
+}
+
+.dark-mode .toggle-switch.active {
+    background-color: var(--primary-color);
+}
+
+.dark-mode header {
+    background-color: #353b48;
+}
+
+.dark-mode .content-card {
+    background-color: #353b48;
+    color: #f5f6fa;
+}
+
+.dark-mode footer {
+    background-color: #2f3640;
+    color: #f5f6fa;
+}
+
+.dark-mode .loading-overlay{
+    background-color: #353b48;
+}
+
 </style>
 <body>
    
@@ -394,11 +461,16 @@ footer {
             </ul>
             </nav>
             <div class="bottom-options">
+                <div class="toggle-dark-mode" id="toggleDarkMode">
+                    <span class="toggle-text">Dark Mode</span>
+                    <div class="toggle-switch" id="darkModeSwitch"></div>
+                </div>
                 <div class="toggle-sidebar" id="toggleSidebar">
                     <span class="toggle-text">Collapse sidebar</span>
                     <div class="toggle-switch" id="toggleSwitch"></div>
                 </div>
             </div>
+            
         </div>
        
 
@@ -487,6 +559,33 @@ document.addEventListener('DOMContentLoaded', function() {
     document.dispatchEvent(new Event('pageReady'));
   }, 1500); // 1.5 seconds loading time
 });
+ </script>
+
+ <script>
+    // Toggle dark mode
+const toggleDarkMode = document.getElementById('toggleDarkMode');
+const darkModeSwitch = document.getElementById('darkModeSwitch');
+
+toggleDarkMode.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    darkModeSwitch.classList.toggle('active');
+    
+    // Optional: Save the dark mode state in local storage
+    if (document.body.classList.contains('dark-mode')) {
+        localStorage.setItem('dark-mode', 'enabled');
+    } else {
+        localStorage.setItem('dark-mode', 'disabled');
+    }
+});
+
+// Check the user's dark mode preference on page load
+document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('dark-mode') === 'enabled') {
+        document.body.classList.add('dark-mode');
+        darkModeSwitch.classList.add('active');
+    }
+});
+
  </script>
 </body>
 </html>

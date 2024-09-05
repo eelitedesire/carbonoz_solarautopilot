@@ -3,7 +3,6 @@ version: "1.0.0"
 slug: "carbonoz_solarautopilot"
 description: "CARBONOZ SolarAutopilot for Home Assistant with live Solar dashboard and MQTT inverter control."
 url: "https://github.com/eelitedesire/carbonoz_solarautopilot"
-codenotary: elitedesire0@gmail.com
 ingress: true
 ingress_port: 6789
 ingress_stream: true
@@ -17,8 +16,6 @@ arch:
   - armhf
   - armv7
   - i386
-hassio_api: true
-homeassistant_api: true
 map:
   - share:rw
   - ssl
@@ -30,7 +27,6 @@ ports_description:
   3001/tcp: Web interface (optional)
   6789/tcp: Main application
   7100/tcp: WebSocket
-auth_api: true
 options:
   mqtt_host: ""
   mqtt_port: 1883

@@ -344,8 +344,74 @@ footer {
             border: none;
             display: block;
         }
+/* Dark mode styles */
+body.dark-mode {
+    background-color: #2f3640;
+    color: #f5f6fa;
+}
 
-  
+.dark-mode .sidebar {
+    background-color: #2f3640;
+}
+
+.dark-mode .sidebar .logo-icon {
+    background-color: #f5f6fa;
+    color: #2f3640;
+}
+
+.dark-mode .sidebar .logo-text {
+    color: #f5f6fa;
+}
+
+.dark-mode .sidebar nav li {
+    color: #f5f6fa;
+}
+
+.dark-mode .sidebar nav li:hover {
+    background-color: #353b48;
+}
+
+.dark-mode .sidebar nav li a {
+    color: #f5f6fa;
+}
+
+.dark-mode .sidebar nav li i {
+    color: #dcdde1;
+}
+
+.dark-mode .toggle-sidebar,
+.dark-mode .toggle-dark-mode {
+    color: #f5f6fa;
+}
+
+.dark-mode .toggle-switch {
+    background-color: #353b48;
+}
+
+.dark-mode .toggle-switch.active {
+    background-color: var(--primary-color);
+}
+
+.dark-mode header {
+    background-color: #353b48;
+}
+
+.dark-mode .content-card {
+    background-color: #353b48;
+    color: #f5f6fa;
+}
+
+.dark-mode footer {
+    background-color: #2f3640;
+    color: #f5f6fa;
+}
+.dark-mode .filter-container{
+    background-color: #2f3640;
+    color: #f5f6fa;
+}
+.dark-mode .loading-overlay{
+    background-color: #353b48;
+}
   
   </style>
 </head>
@@ -373,11 +439,16 @@ footer {
             </ul>
             </nav>
             <div class="bottom-options">
+                <div class="toggle-dark-mode" id="toggleDarkMode">
+                    <span class="toggle-text">Dark Mode</span>
+                    <div class="toggle-switch" id="darkModeSwitch"></div>
+                </div>
                 <div class="toggle-sidebar" id="toggleSidebar">
                     <span class="toggle-text">Collapse sidebar</span>
                     <div class="toggle-switch" id="toggleSwitch"></div>
                 </div>
             </div>
+            
         </div>
        
 
@@ -473,5 +544,57 @@ footer {
     }
 </script>
    
+
+<script>
+    // Toggle dark mode
+const toggleDarkMode = document.getElementById('toggleDarkMode');
+const darkModeSwitch = document.getElementById('darkModeSwitch');
+
+// Function to update Grafana iframes based on dark mode
+function updateGrafanaIframes(isDarkMode) {
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach(iframe => {
+        let src = iframe.src;
+
+        // Ensure the src always has a theme parameter
+        if (src.includes('theme=light')) {
+            src = src.replace('theme=light', isDarkMode ? 'theme=dark' : 'theme=light');
+        } else if (src.includes('theme=dark')) {
+            src = src.replace('theme=dark', isDarkMode ? 'theme=dark' : 'theme=light');
+        } else {
+            const separator = src.includes('?') ? '&' : '?';
+            src += `${separator}theme=${isDarkMode ? 'dark' : 'light'}`;
+        }
+
+        iframe.src = src; // reload iframe with the new theme
+    });
+}
+
+toggleDarkMode.addEventListener('click', () => {
+    const isDarkMode = document.body.classList.toggle('dark-mode');
+    darkModeSwitch.classList.toggle('active');
+    
+    // Update Grafana dashboards to match the dark mode setting
+    updateGrafanaIframes(isDarkMode);
+    
+    // Optional: Save the dark mode state in local storage
+    if (isDarkMode) {
+        localStorage.setItem('dark-mode', 'enabled');
+    } else {
+        localStorage.setItem('dark-mode', 'disabled');
+    }
+});
+
+// Check the user's dark mode preference on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const isDarkMode = localStorage.getItem('dark-mode') === 'enabled';
+    if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+        darkModeSwitch.classList.add('active');
+    }
+    updateGrafanaIframes(isDarkMode); // always set the correct theme on load
+});
+
+</script>
 </body>
 </html>
