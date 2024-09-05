@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -464,10 +465,14 @@ body.dark-mode {
     background-color: #2f3640;
     color: #f5f6fa;
 }
-
-.dark-mode .loading-overlay{
-    background-color: #353b48;
+#add-rule-btn, #delete-inverter-btn, #update-inverter,#add-scheduled-setting-btn,#delete-inverter-btn,.update{
+    width: 20%;
+    padding: 16px;
 }
+
+
+
+
 </style>
 </head>
 <body>
@@ -543,11 +548,11 @@ body.dark-mode {
                             <label for="dischargeVoltage">Discharge Voltage:</label>
                             <input type="number" id="dischargeVoltage" name="dischargeVoltage" step="0.1" required>
                             
-                            <button type="submit">Update Universal Settings</button>
+                            <button type="submit" id="update-inverter">Update Universal </button>
                         </form>
                 
                         <h2>Inverter Settings</h2>
-                        <button id="add-inverter-btn">Add New Inverter Type</button>
+                        <button class="update" id="add-inverter-btn">Add New Inverter</button>
                         <form id="inverter-settings-form">
                             <label for="inverter-type">Inverter Type:</label>
                             <select id="inverter-type" name="type"></select>
@@ -566,8 +571,8 @@ body.dark-mode {
                                 <input type="number" id="maxSellPower" name="maxSellPower">
                             </div>
                             
-                            <button type="submit" class="update">Update Inverter Settings</button>
-                            <button type="button" id="delete-inverter-btn">Delete Inverter Type</button>
+                            <button type="submit" class="update">Update Inverter </button>
+                            <button type="button" id="delete-inverter-btn">Delete Inverter </button>
                         </form>
                 
                         <h2>Automation Rules</h2>
@@ -588,7 +593,7 @@ body.dark-mode {
                         </table>
                 
                         <h2>Scheduled Settings</h2>
-                        <button id="add-scheduled-setting-btn">Add New Scheduled Setting</button>
+                        <button id="add-scheduled-setting-btn">Add New Scheduled</button>
                         <br>
                 <br>
                         <table id="scheduled-settings-table">
@@ -1051,5 +1056,43 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
    </script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
 </body>
 </html>
