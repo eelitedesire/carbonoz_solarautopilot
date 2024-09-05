@@ -452,6 +452,11 @@ body.dark-mode {
                         <h3>Last 30 Days</h3>
                         <canvas id="last-30-days-chart"></canvas>
                     </div>
+<br>
+                    <div class="chart-container">
+                        <h3>Battery Charge/Discharge - Last 30 Days</h3>
+                        <canvas id="battery-chart"></canvas>
+                    </div>
     
                     <div class="card">
                         <h3>Last 30 Days Data</h3>
@@ -842,6 +847,77 @@ body.dark-mode {
     // Hide loading overlay
     const loadingOverlay = document.getElementById('loadingOverlay');
     loadingOverlay.style.display = 'none';
+});
+</script>
+
+<script>
+    // Function to get battery data from table
+function getBatteryData(tableId) {
+    const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+    let labels = [];
+    let batteryChargedData = [];
+    let batteryDischargedData = [];
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        labels.push(cells[0].textContent.trim());
+        batteryChargedData.push(parseFloat(cells[3].textContent));
+        batteryDischargedData.push(parseFloat(cells[4].textContent));
+    });
+
+    return { labels: labels.reverse(), batteryChargedData: batteryChargedData.reverse(), batteryDischargedData: batteryDischargedData.reverse() };
+}
+
+// Function to create battery chart
+function createBatteryChart(chartElementId, data) {
+    const ctx = document.getElementById(chartElementId).getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.labels,
+            datasets: [
+                {
+                    label: 'Battery Charged',
+                    data: data.batteryChargedData,
+                    backgroundColor: '#4CAF50',
+                    stack: 'battery'
+                },
+                {
+                    label: 'Battery Discharged',
+                    data: data.batteryDischargedData.map(value => -value),
+                    backgroundColor: '#F44336',
+                    stack: 'battery'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { stacked: true },
+                y: {
+                    stacked: true,
+                    title: { display: true, text: 'kWh' }
+                }
+            },
+            plugins: {
+                legend: { position: 'top' },
+                title: { 
+                    display: true, 
+                    text: 'Battery Charge/Discharge - Last 30 Days',
+                    font: { size: 16 }
+                }
+            }
+        }
+    });
+}
+
+// Add this to your existing DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', () => {
+    // ... (existing code)
+
+    // Create battery chart
+    const batteryData = getBatteryData('last30days-table');
+    createBatteryChart('battery-chart', batteryData);
 });
 </script>
 
