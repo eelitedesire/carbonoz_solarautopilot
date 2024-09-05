@@ -256,23 +256,6 @@ async function getCurrentValue(topic) {
   }
 }
 
-async function getCurrentData(topic) {
-  const query = `
-        SELECT last("value") AS "value"
-        FROM "state"
-        WHERE "topic" = '${topic}'
-        ORDER BY time DESC
-        LIMIT 1
-    `
-
-  try {
-    const result = await influx.query(query)
-    return result[0]
-  } catch (error) {
-    console.error(`Error querying InfluxDB for topic ${topic}:`, error)
-    throw error
-  }
-}
 
 // Fetch analytics data from InfluxDB
 async function queryInfluxDB(topic) {
@@ -505,80 +488,14 @@ app.get('/analytics', async (req, res) => {
 });
 
 
-app.get('/', async (req, res) => {
-  try {
-    const loadPower = await getCurrentData('solar_assistant_DEYE/total/load_power/state');
-        const solarProduction = await getCurrentData('solar_assistant_DEYE/total/pv_power/state');
-        const batteryStateOfCharge = await getCurrentData('solar_assistant_DEYE/total/battery_state_of_charge/state');
-        const gridImport = await getCurrentData('solar_assistant_DEYE/total/grid_power/state');
-        const gridVoltage = await getCurrentData('solar_assistant_DEYE/total/grid_voltage/state');
-        const BatteryPower = await getCurrentData('solar_assistant_DEYE/total/battery_power/state');
-        const BatteryVoltage = await getCurrentData('solar_assistant_DEYE/battery_1/voltage/state');  
-        const BatteryCurrent = await getCurrentData('solar_assistant_DEYE/battery_1/power/state');  
-        const BatteryTemperature = await getCurrentData('solar_assistant_DEYE/battery_1/temperature/state');  
-        const BatteryTemperatureMos = await getCurrentData('solar_assistant_DEYE/battery_1/temperature_mos/state'); 
-        const BatteryTemperatureEnv = await getCurrentData('solar_assistant_DEYE/battery_1/temperature_env/state'); 
-
-        const data = {
-          loadPower,
-          solarProduction,
-          batteryStateOfCharge,
-          gridImport,
-          gridVoltage,
-          BatteryPower,
-          BatteryVoltage, 
-          BatteryCurrent,
-          BatteryTemperature,
-          BatteryTemperatureMos,
-          BatteryTemperatureEnv  
-        };
-
-    res.render('energy-dashboard', {
-      data,
-      ingress_path: process.env.INGRESS_PATH || '',
-      mqtt_host: options.mqtt_host,
-    })
-  } catch (error) {
-    console.error('Error fetching data from InfluxDB:', error)
-    res.status(500).json({ error: 'Error fetching data from InfluxDB' })
-  }
+app.get('/', (req, res) => {
+  res.render('energy-dashboard', {
+    ingress_path: process.env.INGRESS_PATH || '',
+    mqtt_host: options.mqtt_host, 
+  })
 })
 
-app.get('/api/realtime-data', async (req, res) => {
-  try {
-    const loadPower = await getCurrentData('solar_assistant_DEYE/total/load_power/state');
-        const solarProduction = await getCurrentData('solar_assistant_DEYE/total/pv_power/state');
-        const batteryStateOfCharge = await getCurrentData('solar_assistant_DEYE/total/battery_state_of_charge/state');
-        const gridImport = await getCurrentData('solar_assistant_DEYE/total/grid_power/state');
-        const gridVoltage = await getCurrentData('solar_assistant_DEYE/total/grid_voltage/state');
-        const BatteryPower = await getCurrentData('solar_assistant_DEYE/total/battery_power/state');
-        const BatteryVoltage = await getCurrentData('solar_assistant_DEYE/battery_1/voltage/state'); 
-        const BatteryCurrent = await getCurrentData('solar_assistant_DEYE/battery_1/power/state');  
-        const BatteryTemperature = await getCurrentData('solar_assistant_DEYE/battery_1/temperature/state');  
-        const BatteryTemperatureMos = await getCurrentData('solar_assistant_DEYE/battery_1/temperature_mos/state'); 
-        const BatteryTemperatureEnv = await getCurrentData('solar_assistant_DEYE/battery_1/temperature_env/state'); 
 
-        const data = {
-            loadPower,
-            solarProduction,
-            batteryStateOfCharge,
-            gridImport,
-            gridVoltage,
-            BatteryPower,
-            BatteryVoltage,
-            BatteryCurrent,
-            BatteryTemperature,
-            BatteryTemperatureMos,
-            BatteryTemperatureEnv 
-            
-        };
-
-    res.json(data)
-  } catch (error) {
-    console.error('Error fetching real-time data:', error)
-    res.status(500).json({ error: 'Error fetching real-time data' })
-  }
-})
 
 app.get('/api/timezone', (req, res) => {
   res.json({ timezone: currentTimezone });
