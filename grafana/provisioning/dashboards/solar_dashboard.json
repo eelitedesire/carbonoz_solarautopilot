@@ -1025,43 +1025,41 @@
       "datasource": "InfluxDB",
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
           "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
             "drawStyle": "bars",
+            "lineInterpolation": "linear",
+            "barAlignment": 0,
+            "lineWidth": 1,
             "fillOpacity": 100,
             "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
+            "spanNulls": true,
             "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
+            "showPoints": "never",
             "pointSize": 5,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisColorMode": "text",
+            "axisBorderShow": false,
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "never",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "normal"
+            "axisCenteredZero": false,
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
             },
             "thresholdsStyle": {
               "mode": "off"
             }
           },
-          "links": [],
+          "color": {
+            "mode": "palette-classic"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -1076,115 +1074,10 @@
               }
             ]
           },
+          "links": [],
           "unit": "watt"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Direktverbrauch"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#73BF69",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Speicher laden"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#FADE2A",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Netzeinspeisung"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#F2495C",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "PV-Ertrag"
-            },
-            "properties": [
-              {
-                "id": "custom.drawStyle",
-                "value": "line"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "rgb(255, 255, 255)",
-                  "mode": "fixed"
-                }
-              },
-              {
-                "id": "custom.drawStyle",
-                "value": "line"
-              },
-              {
-                "id": "custom.stacking",
-                "value": {
-                  "group": "A",
-                  "mode": "none"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Inverter 2"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "semi-dark-yellow",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Total"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "semi-dark-red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 8,
@@ -1194,61 +1087,22 @@
       },
       "id": 189,
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
         "tooltip": {
           "mode": "multi",
-          "sort": "none"
+          "sort": "none",
+          "maxHeight": 600
+        },
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
         }
       },
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "alias": "Total",
-          "datasource": "InfluxDB",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT last(\"value\") AS \"Total\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/total/pv_power/state' GROUP BY time($__interval) fill(null)",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        },
-        {
-          "alias": "Inverter 1",
+          "alias": "$tag_topic",
           "datasource": "InfluxDB",
           "groupBy": [
             {
@@ -1266,115 +1120,28 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"value\") AS \"Inverter 1\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/inverter_1/pv_power/state' GROUP BY time($__interval) fill(null)",
+          "query": "SELECT last(\"value\") AS \"PV Power\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" =~ /solar_assistant_DEYE\\/inverter_\\d+\\/pv_power\\/state/ GROUP BY time($__interval), \"topic\" fill(null)",
           "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
           "tags": []
-        },
+        }
+      ],
+      "transformations": [
         {
-          "alias": "Inverter 2",
-          "datasource": "InfluxDB",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": false,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT last(\"value\") AS \"Inverter 2\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/inverter_2/pv_power/state'\n  \nGROUP BY time($__interval) fill(null)",
-          "rawQuery": true,
-          "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
+          "id": "renameByRegex",
+          "options": {
+            "regex": "solar_assistant_DEYE\\/inverter_(\\d+)\\/pv_power\\/state",
+            "replace": "Inverter $1"
+          }
         }
       ],
       "title": "PV power",
-      "transformations": [
-        {
-          "id": "calculateField",
-          "options": {
-            "binary": {
-              "left": "PV-Ertrag",
-              "operator": "-",
-              "reducer": "sum",
-              "right": "Speicher laden"
-            },
-            "mode": "binary",
-            "reduce": {
-              "reducer": "sum"
-            }
-          }
-        },
-        {
-          "id": "calculateField",
-          "options": {
-            "alias": "Direktverbrauch",
-            "binary": {
-              "left": "PV-Ertrag - Speicher laden",
-              "operator": "-",
-              "reducer": "sum",
-              "right": "Netzeinspeisung"
-            },
-            "mode": "binary",
-            "reduce": {
-              "reducer": "sum"
-            }
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Hausverbrauch": false,
-              "Hausverbrauch - Netzbezug": true,
-              "PV-Ertrag - Speicher laden": true
-            },
-            "indexByName": {},
-            "renameByName": {}
-          }
-        }
-      ],
       "type": "timeseries"
-    },
+    }
+    
+    
+    ,
     {
       "datasource": "InfluxDB",
       "fieldConfig": {
