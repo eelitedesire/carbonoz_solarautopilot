@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 5,
+  "id": 2,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -197,6 +197,9 @@
           "color": {
             "mode": "thresholds"
           },
+          "custom": {
+            "neutral": 0
+          },
           "mappings": [],
           "max": 5000,
           "min": -5000,
@@ -204,14 +207,15 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "dark-red"
+                "color": "dark-red",
+                "value": null
               },
               {
                 "color": "red",
                 "value": -4000
               },
               {
-                "color": "orange",
+                "color": "dark-red",
                 "value": -2500
               },
               {
@@ -439,7 +443,7 @@
       "type": "bargauge"
     }
   ],
-  "refresh": "2s",
+  "refresh": "5s",
   "schemaVersion": 39,
   "tags": [
     "featured-viz",
@@ -471,6 +475,6 @@
   "timezone": "Indian/Mauritius",
   "title": "Solar Power Dashboard",
   "uid": "solar_power_dashboard",
-  "version": 4,
+  "version": 2,
   "weekStart": ""
 }
