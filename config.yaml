@@ -47,3 +47,4 @@ schema:
   database_name: str?
   database_username: str?
   database_password: password?
+panel: true # This ensures the sidebar panel is shown automatically
