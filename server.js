@@ -291,18 +291,18 @@ function calculateDailyDifference(data) {
 
 function calculateDailyDifferenceForSockets(data) {
   if (data.length === 0) return 0
-
+  
   const lastIndex = data.length - 1
   const previousValue = data[lastIndex - 1]?.value || 0
   const currentValue = data[lastIndex].value
   const difference = currentValue - previousValue
-
+  
   return parseFloat(difference.toFixed(1))
 }
 
 function calculateLastTwoDaysDifference(data) {
   const dataLength = data.length
-
+  
   if (dataLength < 2) {
     // If there's not enough data, return 0
     return [
@@ -312,15 +312,15 @@ function calculateLastTwoDaysDifference(data) {
       },
     ]
   }
-
+  
   const latestDay = data[dataLength - 1]
   const previousDay = data[dataLength - 2]
-
+  
   let difference
-
+  
   if (!previousDay.value) {
-    // If no data for the previous day, display zero
-    difference = 0
+    // If no data for the previous day, display current day's data as is
+    difference = latestDay.value
   } else if (latestDay.value <= previousDay.value) {
     // If current day's data is less than or equal to previous day's data, display it as is
     difference = latestDay.value
@@ -328,7 +328,7 @@ function calculateLastTwoDaysDifference(data) {
     // If current day's data is greater, calculate the difference
     difference = latestDay.value - previousDay.value
   }
-
+  
   return [
     {
       time: latestDay.time,
