@@ -4890,43 +4890,42 @@
       "datasource": "InfluxDB",
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
           "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "lineInterpolation": "stepBefore",
             "barAlignment": 0,
             "barWidthFactor": 0.6,
-            "drawStyle": "line",
+            "lineWidth": 1,
             "fillOpacity": 10,
             "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
+            "spanNulls": true,
             "insertNulls": false,
-            "lineInterpolation": "stepBefore",
-            "lineWidth": 1,
+            "showPoints": "never",
             "pointSize": 5,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisColorMode": "text",
+            "axisBorderShow": false,
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "never",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
+            "axisCenteredZero": false,
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
             },
             "thresholdsStyle": {
               "mode": "off"
             }
           },
-          "links": [],
+          "color": {
+            "mode": "palette-classic"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -4941,6 +4940,7 @@
               }
             ]
           },
+          "links": [],
           "unit": "%"
         },
         "overrides": []
@@ -4953,142 +4953,43 @@
       },
       "id": 139,
       "options": {
-        "legend": {
-          "calcs": [
-            "mean"
-          ],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
         "tooltip": {
           "mode": "multi",
           "sort": "none"
+        },
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": [
+            "mean"
+          ]
         }
       },
       "pluginVersion": "8.4.3",
       "targets": [
         {
-          "alias": "SOC",
+          "alias": "$tag_topic",
           "datasource": "InfluxDB",
           "hide": false,
-          "query": "SELECT MEAN(\"value\") AS \"Battery state of charge\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" = 'solar_assistant_DEYE/battery_1/state_of_charge/state' GROUP BY time($__interval) fill(null)",
+          "query": "SELECT MEAN(\"value\") AS \"Battery state of charge\" FROM \"state\"\nWHERE $timeFilter\nAND \"topic\" =~ /solar_assistant_DEYE\\/battery_\\d+\\/state_of_charge\\/state/ GROUP BY time($__interval), \"topic\" fill(null)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series"
         }
       ],
-      "title": "Battery state of charge",
       "transformations": [
         {
-          "id": "calculateField",
+          "id": "renameByRegex",
           "options": {
-            "binary": {
-              "left": "Hausverbrauch",
-              "operator": "-",
-              "reducer": "sum",
-              "right": "Netzbezug"
-            },
-            "mode": "binary",
-            "reduce": {
-              "reducer": "sum"
-            }
-          }
-        },
-        {
-          "id": "calculateField",
-          "options": {
-            "alias": "Autarkiegrado",
-            "binary": {
-              "left": "Hausverbrauch - Netzbezug",
-              "operator": "/",
-              "reducer": "sum",
-              "right": "Hausverbrauch"
-            },
-            "mode": "binary",
-            "reduce": {
-              "reducer": "sum"
-            },
-            "replaceFields": false
-          }
-        },
-        {
-          "id": "calculateField",
-          "options": {
-            "binary": {
-              "left": "PV",
-              "operator": "-",
-              "reducer": "sum",
-              "right": "Netzeinspeisung"
-            },
-            "mode": "binary",
-            "reduce": {
-              "reducer": "sum"
-            }
-          }
-        },
-        {
-          "id": "calculateField",
-          "options": {
-            "alias": "Eigenverbrauchsgrado",
-            "binary": {
-              "left": "PV - Netzeinspeisung",
-              "operator": "/",
-              "reducer": "sum",
-              "right": "PV"
-            },
-            "mode": "binary",
-            "reduce": {
-              "reducer": "sum"
-            }
-          }
-        },
-        {
-          "id": "calculateField",
-          "options": {
-            "alias": "Autarkiegrad",
-            "binary": {
-              "left": "Autarkiegrado",
-              "operator": "*",
-              "reducer": "sum",
-              "right": "100"
-            },
-            "mode": "binary",
-            "reduce": {
-              "reducer": "sum"
-            }
-          }
-        },
-        {
-          "id": "calculateField",
-          "options": {
-            "alias": "Eigenverbrauchsgrad",
-            "binary": {
-              "left": "Eigenverbrauchsgrado",
-              "operator": "*",
-              "reducer": "sum",
-              "right": "100"
-            },
-            "mode": "binary",
-            "reduce": {
-              "reducer": "sum"
-            },
-            "replaceFields": false
+            "regex": "battery_(\\d+)",
+            "replace": "Battery $1"
           }
         },
         {
           "id": "organize",
           "options": {
-            "excludeByName": {
-              "Autarkiegrado": true,
-              "Eigenverbrauchsgrado": true,
-              "Hausverbrauch": true,
-              "Hausverbrauch - Netzbezug": true,
-              "Netzbezug": true,
-              "Netzeinspeisung": true,
-              "PV": true,
-              "PV - Netzeinspeisung": true
-            },
+            "excludeByName": {},
             "indexByName": {},
             "renameByName": {}
           }
@@ -5096,6 +4997,7 @@
       ],
       "type": "timeseries"
     }
+    
   ],
   "refresh": "5s",
   "schemaVersion": 39,
